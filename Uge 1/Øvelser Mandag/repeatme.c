@@ -1,13 +1,17 @@
 #include<stdio.h>
 #include<stdlib.h>
+#include<string.h>
 
-int main(int argc, char *argv[]){
-	if(argc!=2){
-		printf("Wrong number of arguments\n");
-		return EXIT_FAILURE;	
-	}
+int main(int argc,char* argv[]){
+    
 
-	printf("%s\n%s\n",argv[1],argv[1]);
+    if(argc == 2){
+        printf("%s\n\n", argv[1]);
+        printf("%s\n", argv[1]);
+    }
+    else {
+        printf("Wrong number of argument");
+    }
 
-	return EXIT_SUCCESS;
+    return EXIT_SUCCESS;
 }

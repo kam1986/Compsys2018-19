@@ -1,2 +1,3 @@
 CC=gcc
-CFLAGS=-std=c11 -Wall -Werror -Wextra -pedantic -g
+CFLAGS= -std=c11 -Wall -Werror -Wextra -pedantic -g
+
