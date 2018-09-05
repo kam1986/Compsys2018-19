@@ -9,10 +9,12 @@ int main(int argc, char *argv[]){
 	FILE *stream;	
 	
 	char c;
+
+	// an array were we can index the given answer
 	char* answers[3] = {
-		"Empty: empty\n",
-		"ascii: ASCII text\n",
-		"data: data\n",
+		"empty\n",
+		"ASCII text\n",
+		"data\n",
 		
 	};
 
@@ -46,17 +48,15 @@ int main(int argc, char *argv[]){
 		// assume that the file is ASCII.
 		size = 1;
 		
-		// TODO - does not work!
+		// use do while instead since we at least once need to check c.
 		do{
             
 			c = fgetc(stream);
-			if(feof(stream)){
-				break;
-			}
 			
 			// test for none-ASCII text characters
-			// (DEL and char with values < 20 are none text)
-			if(c < 20 || c > 126){
+			// (20 < c < 126 are printable chars)
+			if(20 > c || c > 126){
+				// set size to the correct index
 				size = 2;
 				break;			
 			}
@@ -65,7 +65,7 @@ int main(int argc, char *argv[]){
 	}	
 	
 	// print the correct answer
-	printf(answers[size]);
+	printf("%s: %s\n", argv[1], answers[size]);
 
 	// return successfully
 	return EXIT_SUCCESS;	
