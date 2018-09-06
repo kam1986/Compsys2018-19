@@ -3,21 +3,33 @@
 #include<string.h>	// strerror.
 #include<errno.h>	// errno.
 
+// an array were we can index the given answer
+char* answers[3] = {
+	"empty",
+	"ASCII text",
+	"data",
+	
+};
+
+// print correct error for handling corrupt and missing files.
+int print_error(char *path, int errnum){
+	return fprintf(stdout, "%s: cannot determine (%s)\n",
+		path, strerror(errnum));
+}
+
+// adds line terminator comment if endings == 0.
+char* Linecomment(int endings){
+	if(endings == 0){
+		return ", with no line terminators";
+	}
+	return "";
+}
 
 int main(int argc, char *argv[]){
 	
 	FILE *stream;	
-	
+	int newlines = 0;
 	char c;
-
-	// an array were we can index the given answer
-	char* answers[3] = {
-		"empty\n",
-		"ASCII text\n",
-		"data\n",
-		
-	};
-
 	
 	size_t size=0;
 	
@@ -32,19 +44,19 @@ int main(int argc, char *argv[]){
 	stream = fopen(argv[1],"r");
 	
 
-	// TODO - use errno.h lib to test if the file exist
-	//      - and if it can be read.
-	//		- write the correct messeges to the stdout.
-
+	// test for open file error.
+	if(!stream){
+		print_error(argv[1],errno);
+	}
 	
 	// gets size of the file
 	fseek(stream, 0, SEEK_END);
 	size = ftell(stream);	
+	fseek(stream, 0, SEEK_SET);
 	
 
 	// test for empty file	
 	if(size){
-		fseek(stream, 0, SEEK_SET);
 		// assume that the file is ASCII.
 		size = 1;
 		
@@ -53,19 +65,33 @@ int main(int argc, char *argv[]){
             
 			c = fgetc(stream);
 			
+			// testing for end of file
+			if(c == EOF){
+				break;
+			}
+
+			// testing for lineterminators
+			// 13 = 0000 1101 = CR (carriage return)
+			// 10 = 0000 1010 = LF (NL line feed, newline)
+			if(c == (char) 10 || c == (char) 13){
+				newlines++;
+			}
+
 			// test for none-ASCII text characters
 			// (20 < c < 126 are printable chars)
-			if(20 > c || c > 126){
+			if((32 > c || c > 126) && (c != (char) 13) && (c != (char) 10)){
 				// set size to the correct index
 				size = 2;
+				// prevent line termination comment.
+				newlines++;
 				break;			
 			}
 			
-		}while(feof(stream));
+		}while(1);
 	}	
 	
 	// print the correct answer
-	printf("%s: %s\n", argv[1], answers[size]);
+	fprintf(stdout, "%s: %s%s\n", argv[1], answers[size], Linecomment(newlines));
 
 	// return successfully
 	return EXIT_SUCCESS;	
