@@ -79,7 +79,7 @@ int main(int argc, char *argv[]){
 
 			// test for none-ASCII text characters
 			// (20 < c < 126 are printable chars)
-			if((32 > c || c > 126) && (c != (char) 13) && (c != (char) 10)){
+			if((32 > c || c > 126) && c != 13 && c != 10){
 				// set size to the correct index
 				size = 2;
 				// prevent line termination comment.
