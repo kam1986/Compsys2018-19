@@ -36,7 +36,7 @@ int main(int argc, char *argv[]){
 	// Test if the program get more then one input
 	// TODO - write the correct message. 	
 	if(argc != 2){
-		printf("some comment");
+		printf("Usage: ./file path");
 		return EXIT_FAILURE;
 	}
 	
@@ -71,8 +71,8 @@ int main(int argc, char *argv[]){
 			}
 
 			// testing for lineterminators
-			// 13 = 0000 1101 = CR (carriage return)
 			// 10 = 0000 1010 = LF (NL line feed, newline)
+			// 13 = 0000 1101 = CR (carriage return)
 			if(c == (char) 10 || c == (char) 13){
 				newlines++;
 			}
@@ -88,6 +88,9 @@ int main(int argc, char *argv[]){
 			}
 			
 		}while(1);
+	}
+	else{
+		newlines++;
 	}	
 	
 	// print the correct answer
