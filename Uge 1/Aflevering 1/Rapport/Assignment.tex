@@ -47,7 +47,7 @@ which all take a count of the different kind of characters and depending on the 
 A none-trivial implementation decision was to use the size variable as a indexer to the array of standard output e.i. answers. By doing so we can map the size directly to the array for the cases if the file is empty or only one byte long, else after testing these cases we set size to index of ascii text file and assume this are the case, we then try to disprove it through testing each character in the file lays within the given set of characters given at page 4 in the assignment, and if the program find one character that is not we simple break the search and return the case of a data file.
 
 \section*{Testing}
-We have implemented some extra test where some of them are files with only CR or LF and both with and without escape sequence and overstriking. We test for members in all subsets, for files with no read permission, for none existing files, and single byte files. As a important comment we have commented out the set -e command since it force our test to terminate when testing against none-existing files.
+We have implemented some extra test where some of them are files with only CR or LF and both with and without escape sequence and overstriking. We test for members in all subsets, for files with no read permission, for none existing files, and single byte files. As a important comment we have commented out the \textbf{set -e} command since it force our test to terminate when testing against none-existing files.
 \\[10pt]
 We have lest the test 0X7F.input be to show that this is not a full implementation of file yet, and to show that we recognize, that there are cases where the 3 file type we where given wasn't enough. 
 \end{document}
