@@ -17,6 +17,12 @@ printf "Hello, World!" > test_files/ascii2.input
 printf "Hello,\x00World!\n" > test_files/data.input
 printf "" > test_files/empty.input
 ### TODO: Generate more test files ###
+printf "s" > test_files/shortfile.input
+printf "\x00" > test_files/shortdatafile.input
+printf "a\x0d" > test_files/withCRnoLF.input
+printf "aa\x08" > test_files/within7to13.input
+printf "aa\x1b" > test_files/withX1b.input
+printf "\x20\x7e" > test_files/withinX20toX7e
 printf "hemmelighed" > test_files/hemmelig.input
 chmod -r test_files/hemmelig
 

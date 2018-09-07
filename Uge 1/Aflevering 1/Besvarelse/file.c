@@ -4,11 +4,11 @@
 #include<errno.h>	// errno.
 
 // an array were we can index the given answer
-char* answers[3] = {
-	"empty",
+char* answers[4] = {
+	"empty", 
+	"very short file (no magic)",
 	"ASCII text",
 	"data",
-	
 };
 
 
@@ -18,18 +18,39 @@ int print_error(char *path, int errnum){
 		path, strerror(errnum));
 }
 
-// adds line terminator comment if endings == 0.
-char* Linecomment(int endings){
-	if(endings == 0){
-		return ", with no line terminators";
+// adds line terminator comment.
+char* Linecomment(int cr, int lf){
+	if(lf == 0 && cr > 0){
+		return ", with CR line terminators\n";
+	}
+	if(lf > 0 && cr > 0){
+		return ", with CR, LF line terminators\n";
+	}
+	if(lf == 0 && cr == 0){
+		return ", with no line terminators\n";
 	}
 	return "";
+}
+
+char* comments(int os, int es){
+	char* str = "";
+	if(es){
+		s = sprintf("%s%s", str, ", with escape sequences");
+	}
+
+	if(os){
+		s = sprintf("%s%s", str, ", with overstriking");
+	}
+	return str;
 }
 
 int main(int argc, char *argv[]){
 	
 	FILE *stream;	
-	int newlines = 0;
+	int cr = 0;
+	int lf = 0;
+	int os = 0;
+	int es = 0;
 	char c;
 	
 	size_t size=0;
@@ -68,12 +89,17 @@ int main(int argc, char *argv[]){
 	fseek(stream, 0, SEEK_END);
 	size = ftell(stream);	
 	fseek(stream, 0, SEEK_SET);
-	
+
+	// test for small files.
+	if(size ==1){
+		fprintf(stdout, "%s: very short file (no magic)\n", argv[1]);
+		return EXIT_SUCCESS;
+	}
 
 	// test for empty file	
 	if(size){
 		// assume that the file is ASCII.
-		size = 1;
+		size = 2;
 		
 		// use do while instead since we at least once need to check c.
 		while(1){
@@ -85,31 +111,43 @@ int main(int argc, char *argv[]){
 				break;
 			}
 
+			if(c == 0x08){
+				os++;
+			}
+
+			if(c == 0x1b){
+				es++;
+			}
 			// testing for lineterminators
 			// 10 = 0000 1010 = LF (NL line feed, newline)
 			// 13 = 0000 1101 = CR (carriage return)
-			if(c == (char) 10 || c == (char) 13){
-				newlines++;
+			if(c == 10){
+				lf++;
+			}
+			if(c == 13){
+				cr++;
 			}
 
 			// test for none-ASCII text characters
 			// (20 < c < 126 are printable chars)
-			if((32 > c || c > 126) && c != 13 && c != 10){
+			if((c < 32 && (c < 7 || c > 13)) || c > 126){
 				// set size to the correct index
-				size = 2;
+				size = 3;
 				// prevent line termination comment.
-				newlines++;
+				cr = 0;
+				lf = 1;
 				break;			
 			}
 			
 		}
 	}
 	else{
-		newlines++;
+		cr = 0;
+		lf = 1;;
 	}	
 	
 	// print the correct answer
-	fprintf(stdout, "%s: %s%s\n", argv[1], answers[size], Linecomment(newlines));
+	fprintf(stdout, "%s: %s%s%s\n", argv[1], answers[size], Linecomment(cr,lf),comments(os, es));
 
 	// return successfully
 	return EXIT_SUCCESS;	
