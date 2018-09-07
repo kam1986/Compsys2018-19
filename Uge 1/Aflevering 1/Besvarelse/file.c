@@ -11,6 +11,7 @@ char* answers[3] = {
 	
 };
 
+
 // print correct error for handling corrupt and missing files.
 int print_error(char *path, int errnum){
 	return fprintf(stdout, "%s: cannot determine (%s)\n",
@@ -45,8 +46,22 @@ int main(int argc, char *argv[]){
 	
 
 	// test for open file error.
+	// errno = 2 none-existing files
+	// errno = 13 no read permition.
 	if(!stream){
-		print_error(argv[1],errno);
+		switch (errno) {
+		case 13:
+			fprintf(stdout, "%s: writable, regular file, no read permission\n", argv[1]);
+			break;
+
+		case 2:
+			fprintf(stdout, "%s: cannot open `%s' (%s)\n", argv[1], argv[1], strerror(errno));
+			break;
+		default:
+			print_error(argv[1],errno);
+			break;
+		}
+		return EXIT_FAILURE;
 	}
 	
 	// gets size of the file
@@ -61,7 +76,7 @@ int main(int argc, char *argv[]){
 		size = 1;
 		
 		// use do while instead since we at least once need to check c.
-		do{
+		while(1){
             
 			c = fgetc(stream);
 			
@@ -87,7 +102,7 @@ int main(int argc, char *argv[]){
 				break;			
 			}
 			
-		}while(1);
+		}
 	}
 	else{
 		newlines++;
