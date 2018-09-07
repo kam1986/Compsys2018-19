@@ -16,14 +16,18 @@ printf "Hello, World!\n" > test_files/ascii.input
 printf "Hello, World!" > test_files/ascii2.input
 printf "Hello,\x00World!\n" > test_files/data.input
 printf "" > test_files/empty.input
-### TODO: Generate more test files ###
-printf "s" > test_files/shortfile.input
-printf "\x00" > test_files/shortdatafile.input
-printf "a\x0d" > test_files/withCRnoLF.input
-printf "aa\x08" > test_files/within7to13.input
-printf "aa\x1b" > test_files/withX1b.input
-printf "\x20\x7e" > test_files/withinX20toX7e
-printf "hemmelighed" > test_files/hemmelig.input
+### new tests ###
+printf "s" > test_files/shortfile.input             # testing 1-byte long ascii file 
+printf "\x00" > test_files/shortdatafile.input      # testing 1-byte lone data file
+printf "a\x0d" > test_files/withCRnoLF.input        # testing carraige return
+printf "a\x07" > test_files/testlowerboarder.input  # testing lowerboarder
+printf "aa\x08" > test_files/within8to13.input      # testing lowerboarder
+printf "aa\x1b" > test_files/withX1b.input          # testing escape sequence
+printf "\x20A" > test_files/0X20.input              # testing boarder
+printf "\x1Fa" > test_files/0X1F.input              # testing boarder
+printf "\x7Es" > test_files/0X7E.input              # testing boarder
+printf "\x7Fe" > test_files/0X7F.input              # testing boarder
+printf "hemmelighed" > test_files/hemmelig.input    # testing none-readable files.
 chmod -r test_files/hemmelig
 
 

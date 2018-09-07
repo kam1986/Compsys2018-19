@@ -1,0 +1,22 @@
+# Fdb version 3
+["pdflatex"] 1536360051 "/home/kasper/Skrivebord/Compsys2018-19/Uge 1/Aflevering 1/Rapport/Assignment.tex" "Assignment.pdf" "Assignment" 1536360051
+  "/home/kasper/.texlive/texmf-var/web2c/pdftex/pdflatex.fmt" 1536349096 7906415 fe2b70a51519b517e793ee41d6b82f08 ""
+  "/home/kasper/Skrivebord/Compsys2018-19/Uge 1/Aflevering 1/Rapport/Assignment.tex" 1536360051 1678 24062db3726d0a47f3e52c70690f1885 ""
+  "/usr/share/texmf-dist/fonts/map/fontname/texfonts.map" 1525040097 3332 103109f5612ad95229751940c61aada0 ""
+  "/usr/share/texmf-dist/fonts/tfm/public/cm/cmr10.tfm" 1525040101 1296 45809c5a464d5f32c8f98ba97c1bb47f ""
+  "/usr/share/texmf-dist/tex/generic/babel-danish/danish.ldf" 1525040106 4927 0f24cb8b4fbb6a57e169ccdacdab4a7e ""
+  "/usr/share/texmf-dist/tex/generic/babel-english/english.ldf" 1525040106 7008 9ff5fdcc865b01beca2b0fe4a46231d4 ""
+  "/usr/share/texmf-dist/tex/generic/babel/babel.def" 1525040106 67244 2dce3d67c354c8d92f638d0f8682fb73 ""
+  "/usr/share/texmf-dist/tex/generic/babel/babel.sty" 1525040106 15861 065fe343082d0cd2428cf984d6b2ef66 ""
+  "/usr/share/texmf-dist/tex/generic/babel/switch.def" 1525040106 12523 d80bc74bf5e02fe4304443a6de8d01be ""
+  "/usr/share/texmf-dist/tex/generic/babel/txtbabel.def" 1525040106 7434 1b3955075683beb1c883a0fcf92ed2d5 ""
+  "/usr/share/texmf-dist/tex/latex/base/article.cls" 1525040104 19823 fcbc01552b07b608574cbf8e1977e0c0 ""
+  "/usr/share/texmf-dist/tex/latex/base/inputenc.sty" 1525040104 5052 f2525dfd6e503dc383e90b568c6c9f02 ""
+  "/usr/share/texmf-dist/tex/latex/base/size11.clo" 1525040104 8310 c914ded44e64c3c6e0ed92e7ac6a2004 ""
+  "/usr/share/texmf-dist/web2c/texmf.cnf" 1525040116 33301 a3134070eacafb10b1f371612ce2650d ""
+  "Assignment.aux" 1536360051 8 a94a2480d3289e625eea47cd1b285758 ""
+  "Assignment.tex" 1536360051 1678 24062db3726d0a47f3e52c70690f1885 ""
+  "latin.def" 0 -1 0 ""
+  (generated)
+  "Assignment.log"
+  "Assignment.pdf"

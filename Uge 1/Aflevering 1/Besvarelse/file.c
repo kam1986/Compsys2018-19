@@ -21,27 +21,33 @@ int print_error(char *path, int errnum){
 // adds line terminator comment.
 char* Linecomment(int cr, int lf){
 	if(lf == 0 && cr > 0){
-		return ", with CR line terminators\n";
+		return ", with CR line terminators";
 	}
 	if(lf > 0 && cr > 0){
-		return ", with CR, LF line terminators\n";
+		return ", with CR, LF line terminators";
 	}
 	if(lf == 0 && cr == 0){
-		return ", with no line terminators\n";
+		return ", with no line terminators";
 	}
 	return "";
 }
 
-char* comments(int os, int es){
-	char* str = "";
+// adds escape sequence comment.
+char* EscapeComment(int es){
 	if(es){
-		s = sprintf("%s%s", str, ", with escape sequences");
+		return ", with escape sequences";
 	}
 
+	return "";
+}
+
+// adds overstriking comment.
+char* overstrikComment(int os){
 	if(os){
-		s = sprintf("%s%s", str, ", with overstriking");
+		return ", with overstriking";
 	}
-	return str;
+
+	return "";
 }
 
 int main(int argc, char *argv[]){
@@ -105,37 +111,38 @@ int main(int argc, char *argv[]){
 		while(1){
             
 			c = fgetc(stream);
+
+			// testing current character against spec cases.
+			switch (c) {
+				case EOF:
+					break;
+				
+				case 0x08: // Overstriking
+					os++;
+					
+				case 0x0a: // LF - Linefeed
+					lf++;
+
+				case 0x0d: // CR - carraige return
+					cr++;
+
+				case 0x1b: // Escape sequence.
+					es++;
+
+				default:
+					break:
 			
-			// testing for end of file
-			if(c == EOF){
-				break;
-			}
-
-			if(c == 0x08){
-				os++;
-			}
-
-			if(c == 0x1b){
-				es++;
-			}
-			// testing for lineterminators
-			// 10 = 0000 1010 = LF (NL line feed, newline)
-			// 13 = 0000 1101 = CR (carriage return)
-			if(c == 10){
-				lf++;
-			}
-			if(c == 13){
-				cr++;
-			}
 
 			// test for none-ASCII text characters
 			// (20 < c < 126 are printable chars)
-			if((c < 32 && (c < 7 || c > 13)) || c > 126){
+			if((c < 0x20 && (c < 0x07 || c > 0x0D) && c != 0x1B) || c > 0x7E){
 				// set size to the correct index
 				size = 3;
 				// prevent line termination comment.
 				cr = 0;
 				lf = 1;
+				os = 0;
+				es = 0;
 				break;			
 			}
 			
@@ -147,7 +154,8 @@ int main(int argc, char *argv[]){
 	}	
 	
 	// print the correct answer
-	fprintf(stdout, "%s: %s%s%s\n", argv[1], answers[size], Linecomment(cr,lf),comments(os, es));
+	fprintf(stdout, "%s: %s%s%s%s\n", argv[1], answers[size], 
+		Linecomment(cr,lf),EscapeComment(es),overstrikComment(os));
 
 	// return successfully
 	return EXIT_SUCCESS;	
