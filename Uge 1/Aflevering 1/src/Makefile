@@ -10,5 +10,7 @@ file: file.c Makefile
 clean:
 	rm -f *.o
 	rm -f file
+	rm -f test_files/hemmelig.input
+	rm -r test_files
 
 .PHONY: clean

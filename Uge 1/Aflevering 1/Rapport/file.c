@@ -113,21 +113,25 @@ int main(int argc, char *argv[]){
 			c = fgetc(stream);
 
 			// testing current character against spec cases.
-			if(c==EOF) {
-				break;
-			}
-			if(c == 0x08){
-				os++;
-			}
-			if(c==0x0a){
-				lf++;
-			}	
-			if(c==0x0d){
-				cr++;
-			}
-			if(c==0x1b){
-				es++;
-			}
+			switch (c) {
+				case EOF:
+					break;
+				
+				case 0x08: // Overstriking
+					os++;
+					
+				case 0x0a: // LF - Linefeed
+					lf++;
+
+				case 0x0d: // CR - carraige return
+					cr++;
+
+				case 0x1b: // Escape sequence.
+					es++;
+
+				default:
+					break:
+			
 
 			// test for none-ASCII text characters
 			// (20 < c < 126 are printable chars)

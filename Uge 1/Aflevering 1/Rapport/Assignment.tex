@@ -8,7 +8,7 @@
 \usepackage{colortbl}
 \usepackage{lastpage}
 \usepackage{fancyhdr}
-
+\usepackage{minted}
 
 
 %User Macro
@@ -19,7 +19,7 @@
 \title{Assignment 1 \\ CompSys}
 
 \pagestyle{fancy}
-\fansyhf{}
+\fansyhfr{}
 \rhead{CompSys}
 \lhead{B. Alix, K. A. Madsen, C. S. Hansen}
 \rfoot{Side \thepage af \pageref{LastPage}}
@@ -41,9 +41,12 @@ To test the program type ./test.sh in the same terminal.
 As general design, we those to separate different type of output through separate functions. 
 \\
 this gets handle by the functions Linecomment, EscapeComment and overstrikComment, 
-which all take a count of the different kind of characters and depending on the count of the given character return either an empty string or a comment given as a comment.
+which all take a count of the different kind of characters and depending on the count of the given character return either an empty string or a comment given as a comment. an example could be the function below.
 \\
-% input code to show one function
+\inputminted[firstline=22, lastline=33]{c}{file.c}
+\\\noindent
+Here the function takes a counter for both CR and LF charactors, and return different output depending on if there is any and which line terminators there are.
+\\[10pt]
 A none-trivial implementation decision was to use the size variable as a indexer to the array of standard output e.i. answers. By doing so we can map the size directly to the array for the cases if the file is empty or only one byte long, else after testing these cases we set size to index of ascii text file and assume this are the case, we then try to disprove it through testing each character in the file lays within the given set of characters given at page 4 in the assignment, and if the program find one character that is not we simple break the search and return the case of a data file.
 
 \section*{Testing}
