@@ -14,6 +14,7 @@ char* answers[3] = {
 // print correct error for handling corrupt and missing files.
 int print_error(char *path, int errnum){
 	return fprintf(stdout, "%s: cannot determine (%s)\n",
+			// strerror takes a error code number and return a standard error string
 		path, strerror(errnum));
 }
 
@@ -25,17 +26,23 @@ int main(int argc, char *argv[]){
 	
 	size_t size=0;
 	
-	// Test if the program get more then one input
-	// TODO - write the correct message. 	
+	// Test if the program get other then one input
 	if(argc != 2){
-		printf("Usage: ./file path");
+		fprintf(stdout, "Usage: ./file path");
 		return EXIT_FAILURE;
 	}
 	
-	// try to open file
+	// try to open file ("r" == readonly mode)
 	stream = fopen(argv[1],"r");
 	
-	
+	// test if stream is a NULL pointer aka. file reading error
+	if(!stream){
+		// argv[1] are the first argument of the main function, errno (from errno.h)
+		// is a number code for the last tricked error.
+		print_error(argv[1], errno);
+		return EXIT_FAILURE;
+	}
+
 	// gets size of the file ftell returns the displacement of the pointer in bytes,
 	// from the start of the stream
 	fseek(stream, 0, SEEK_END);
@@ -44,7 +51,7 @@ int main(int argc, char *argv[]){
 	// reset stream pointer to head of the stream.
 	fseek(stream, 0, SEEK_SET);
 
-	// test for small files.
+	
 	
 
 	// test for empty file	
