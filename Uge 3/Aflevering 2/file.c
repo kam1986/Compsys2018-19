@@ -105,7 +105,7 @@ int CheckForUTF16(FILE* stream){
 	ret = 1;
 	
 	// make UFT16 check function
-
+	// check first to bytes as described in the assignment.
 	// reset stream pointer to start of the file
 	fseek(stream,0,SEEK_SET);
 	return ret;
