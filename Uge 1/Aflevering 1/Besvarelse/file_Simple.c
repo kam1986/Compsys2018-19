@@ -18,6 +18,13 @@ int print_error(char *path, int errnum){
 		path, strerror(errnum));
 }
 
+
+
+
+
+
+
+// ENTRY POINT //
 int main(int argc, char *argv[]){
 	
 	FILE *stream;	
