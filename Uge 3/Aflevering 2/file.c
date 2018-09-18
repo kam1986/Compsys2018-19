@@ -6,8 +6,8 @@
 // an array were we can index the given answer
 char* answers[7] = {
 	"empty", 
-	"ASCII text",
 	"data",
+	"ASCII text",
 	"ISO-8859",
 	"UTF-8 Unicode",
 
@@ -31,7 +31,7 @@ int print_error(char *path, int errnum){
 int CheckForData(FILE* stream){
 	char c;
 
-	int ret = 1;
+	int ret = 2;
 
 	while(1){
 				
@@ -46,7 +46,7 @@ int CheckForData(FILE* stream){
 		// if c in not in the set describet ad p. 4 assignment 0.
 		if((c < 0x20 && (c < 0x07 || c > 0x0D) && c != 0x1B) || c > 0x7E){
 			// set size to the correct index
-			ret = 2;
+			ret = 1;
 			break;			
 		}
 		
@@ -61,7 +61,7 @@ int CheckForData(FILE* stream){
 // and add comment on what this function does.
 int CheckForISO(FILE* stream){
 	// return value reflex index of answer array.
-	ret = 1;
+	int ret = 4;
 	
 	// make ISO check function
 	/* 	check if check if ther exist a char c
@@ -77,11 +77,105 @@ int CheckForISO(FILE* stream){
 // TODO remember to add the function to the main function
 // and add comment on what this function does.
 //
-// Been worked on - Kasper
+// Is been worked on - Kasper
 
 int CheckForUTF8(FILE* stream){
 	// return value reflex index of answer array.
-	ret = 1;
+	int ret = 1;
+
+	// String for searching the file.
+	// (4 char + 1 string terminator) 
+	char* str[5] = { 0 };
+
+	while(ret == 4){
+		// read the next 4 char of the string
+		// increament the stream pointer by 4 bytes
+		fgets(str, 4, stream);
+		
+
+		if(feof(stream)){
+			break;
+		}
+		// set the last 3 bits to 0
+		// e.i (248 base 10 = 11111000 base 2)
+		char fsttest = str[0] & 248;
+		// ex. 11101111 & 11111000 = 11101000
+		// if any of the 5 left bit in str[0] are 0,
+		// then the result is 0 for that bit
+		// the 5 bit from left must be checked if 1
+		
+		// set the 6 most right bits to 0
+		// and the 2 most left to either 1 or 0
+		// 192 base 10 = 11000000 base 2
+		char sectest = str[1] & 192;
+		char thdtest = str[2] & 192;
+		char fthtest = str[3] & 192;
+		// 128 base 10 = 10000000 base 2
+		// if any of the three above chars has the
+		// bit sequence  1100000 the the checks will return a 
+		// none-valid checkwith value 192 where a valid sequence 
+		// will have 10000000 with value 128
+		
+
+		switch(fsttest){
+
+			// case when 3 bytes follows in the UTF8 char
+			// case 11110000 base 2
+			case 240:
+				// if not all bytes to most left bits are 10 base 2
+				if((sectest & thdtest & fthtest) != 128){
+				 	ret = 1;
+				}
+				break;
+			
+			// both cases when 2 bytes follows in the UTF8 char
+			// case 11101000 base 2 
+			case 232:
+			// case 11100000 base 2
+			case 224:
+				// if not all bytes to most left bits are 10 base 2
+				if((sectest & thdtest ) != 128){
+				 	ret = 1;
+					break
+				}
+				// set the stream pointer 1 byte back.
+				fseek(stream, -1,SEEK_CUR);
+				break;
+
+			// both cases when 1 byte follows in the UTF8 char
+			// case 11001000
+			case 200:
+			// case 1100000 base 2
+			case 192:
+				// if not all bytes to most left bits are 10 base 2
+				if(sectest != 128){
+				 	ret = 1;
+					 break
+				}
+				// set the stream pointer 2 bytes back.
+				fseek(stream, -2,SEEK_CUR);
+				break;
+
+			// both cases when no bytes follows in the UTF8 char
+			// case 01111000 base 2 
+			case 120:
+			// case 01110000 base 2
+			case 112:
+				// set the stream pointer 3 bytes back.
+				fseek(stream, -3,SEEK_CUR);
+				break;
+			
+			default:
+				// all other case are faults 
+				ret = 1;
+				break;
+			
+
+		}
+		
+		return ret;
+	}
+
 	
 	// make UFT8 check function
 	/*
@@ -93,6 +187,7 @@ int CheckForUTF8(FILE* stream){
 		its' two most signiciant byte set to 1 and 0.
 		e.i. for 3 and 4 bytes.
 	*/
+
 
 
 
@@ -163,8 +258,14 @@ int main(int argc, char *argv[]){
 		// test for empty file	
 		// TODO Insert functions in correct order
 		if(size){
-			// uses function that check the stream for none ascii chars. 
-			index = CheckForData(stream);
+
+			index = CheckForUTF8(stream);
+
+			if(index == 1){
+				// uses function that check the stream for none ascii chars.
+				index = CheckForData(stream);
+			}
+
 		}
 		
 		
