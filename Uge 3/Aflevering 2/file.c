@@ -76,6 +76,9 @@ int CheckForISO(FILE* stream){
 
 // TODO remember to add the function to the main function
 // and add comment on what this function does.
+//
+// Been worked on - Kasper
+
 int CheckForUTF8(FILE* stream){
 	// return value reflex index of answer array.
 	ret = 1;
