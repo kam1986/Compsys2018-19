@@ -97,8 +97,8 @@ int CheckForUTF8(FILE* stream){
 			break;
 		}
 		// set the last 3 bits to 0
-		// e.i (248 base 10 = 11111000 base 2)
-		char fsttest = str[0] & 248;
+		// e.i (0xf8 base 16 = 11111000 base 2)
+		char fsttest = str[0] & 0xf8;
 		// ex. 11101111 & 11111000 = 11101000
 		// if any of the 5 left bit in str[0] are 0,
 		// then the result is 0 for that bit
@@ -106,35 +106,35 @@ int CheckForUTF8(FILE* stream){
 		
 		// set the 6 most right bits to 0
 		// and the 2 most left to either 1 or 0
-		// 192 base 10 = 11000000 base 2
-		char sectest = str[1] & 192;
-		char thdtest = str[2] & 192;
-		char fthtest = str[3] & 192;
-		// 128 base 10 = 10000000 base 2
+		// 0xc0 base 16 = 11000000 base 2
+		char sectest = str[1] & 0xc0;
+	 	char thdtest = str[2] & 0xc0;
+		char fthtest = str[3] & 0xc0;
+		// 0x80 base 16 = 10000000 base 2
 		// if any of the three above chars has the
 		// bit sequence  1100000 the the checks will return a 
-		// none-valid checkwith value 192 where a valid sequence 
-		// will have 10000000 with value 128
+		// none-valid checkwith value 0xc0 where a valid sequence 
+		// will have 10000000 with value 0x80
 		
 
 		switch(fsttest){
 
 			// case when 3 bytes follows in the UTF8 char
 			// case 11110000 base 2
-			case 240:
+			case 0xf0:
 				// if not all bytes to most left bits are 10 base 2
-				if((sectest & thdtest & fthtest) != 128){
+				if((sectest & thdtest & fthtest) != 0x80){
 				 	ret = 1;
 				}
 				break;
 			
 			// both cases when 2 bytes follows in the UTF8 char
 			// case 11101000 base 2 
-			case 232:
+			case 0xe8:
 			// case 11100000 base 2
-			case 224:
+			case 0xe0:
 				// if not all bytes to most left bits are 10 base 2
-				if((sectest & thdtest ) != 128){
+				if((sectest & thdtest ) != 0x80){
 				 	ret = 1;
 					break
 				}
@@ -144,11 +144,11 @@ int CheckForUTF8(FILE* stream){
 
 			// both cases when 1 byte follows in the UTF8 char
 			// case 11001000
-			case 200:
+			case 0xc8:
 			// case 1100000 base 2
-			case 192:
+			case 0xc0:
 				// if not all bytes to most left bits are 10 base 2
-				if(sectest != 128){
+				if(sectest != 0x80){
 				 	ret = 1;
 					 break
 				}
@@ -156,16 +156,13 @@ int CheckForUTF8(FILE* stream){
 				fseek(stream, -2,SEEK_CUR);
 				break;
 
-			// both cases when no bytes follows in the UTF8 char
-			// case 01111000 base 2 
-			case 120:
-			// case 01110000 base 2
-			case 112:
-				// set the stream pointer 3 bytes back.
-				fseek(stream, -3,SEEK_CUR);
-				break;
-			
+						
 			default:
+				// case 0xxxxxxx base 2
+				if((fsttest & 0x80) < 0x80){
+					fseek(stream, -3, SEEK_CUR);
+					break;
+				}
 				// all other case are faults 
 				ret = 1;
 				break;
@@ -176,22 +173,7 @@ int CheckForUTF8(FILE* stream){
 		return ret;
 	}
 
-	
-	// make UFT8 check function
-	/*
-		check for correct byte sequence
-		e.i. if first bytes most significant (left most) bit
-		equals 0 then there is only this byte to check
-		if the two most significant bits equals 1 and 
-		the third equals 0 the next byte should have
-		its' two most signiciant byte set to 1 and 0.
-		e.i. for 3 and 4 bytes.
-	*/
-
-
-
-
-		// reset stream pointer to start of the file
+	// reset stream pointer to start of the file
 	fseek(stream,0,SEEK_SET);
 	return ret;
 }
