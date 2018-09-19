@@ -28,7 +28,7 @@ int print_error(char *path, int errnum){
 
 
 // check for none ascci data charachters
-int CheckForData(FILE* stream){
+int CheckForAscii(FILE* stream){
 	char c;
 
 	int ret = 2;
@@ -81,7 +81,7 @@ int CheckForISO(FILE* stream){
 
 int CheckForUTF8(FILE* stream){
 	// return value reflex index of answer array.
-	int ret = 1;
+	int ret = 4;
 
 	// String for searching the file.
 	// (4 char + 1 string terminator) 
@@ -94,6 +94,7 @@ int CheckForUTF8(FILE* stream){
 		
 
 		if(feof(stream)){
+			// need to handle end of file
 			break;
 		}
 		// set the last 3 bits to 0
@@ -119,22 +120,22 @@ int CheckForUTF8(FILE* stream){
 
 		switch(fsttest){
 
-			// case when 3 bytes follows in the UTF8 char
+			// case 4
 			// case 11110000 base 2
 			case 0xf0:
 				// if not all bytes to most left bits are 10 base 2
-				if((sectest & thdtest & fthtest) != 0x80){
+				if((sectest | thdtest | fthtest) != 0x80){
 				 	ret = 1;
 				}
 				break;
 			
-			// both cases when 2 bytes follows in the UTF8 char
+			// case 3
 			// case 11101000 base 2 
 			case 0xe8:
 			// case 11100000 base 2
 			case 0xe0:
 				// if not all bytes to most left bits are 10 base 2
-				if((sectest & thdtest ) != 0x80){
+				if((sectest | thdtest ) != 0x80){
 				 	ret = 1;
 					break
 				}
@@ -142,10 +143,14 @@ int CheckForUTF8(FILE* stream){
 				fseek(stream, -1,SEEK_CUR);
 				break;
 
-			// both cases when 1 byte follows in the UTF8 char
-			// case 11001000
+			// cases 2
+			// case 11011xxx base 2
+			case 0xd8:
+			// case 11010xxx base 2
+			case 0xd0:
+			// case 11001xxx base 2
 			case 0xc8:
-			// case 1100000 base 2
+			// case 11000xxx base 2
 			case 0xc0:
 				// if not all bytes to most left bits are 10 base 2
 				if(sectest != 0x80){
@@ -159,7 +164,7 @@ int CheckForUTF8(FILE* stream){
 						
 			default:
 				// case 0xxxxxxx base 2
-				if((fsttest & 0x80) < 0x80){
+				if(str[0] < 0x80){
 					fseek(stream, -3, SEEK_CUR);
 					break;
 				}
@@ -170,7 +175,7 @@ int CheckForUTF8(FILE* stream){
 
 		}
 		
-		return ret;
+		
 	}
 
 	// reset stream pointer to start of the file
@@ -241,13 +246,22 @@ int main(int argc, char *argv[]){
 		// TODO Insert functions in correct order
 		if(size){
 
-			index = CheckForUTF8(stream);
+			index = CheckForUTF16(stream);
+			
 
+			
+			if(index == 1){
+				index = CheckForUTF8(stream);
+			}
+			
 			if(index == 1){
 				// uses function that check the stream for none ascii chars.
-				index = CheckForData(stream);
+				index = CheckForAscii(stream);
 			}
-
+			
+			if(index == 1){
+				index == CheckForISO(stream);
+			}
 		}
 		
 		
