@@ -296,13 +296,12 @@ int main(int argc, char *argv[]){
 			}
 			
 			if(index == DATA){
-				index == CheckForISO(stream);
+				index = CheckForISO(stream);
 			}
 
 			if(index == DATA){
 				index = CheckForUTF8(stream);
 			}
-			
 		}
 		
 		
