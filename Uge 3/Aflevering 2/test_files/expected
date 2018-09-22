@@ -1,0 +1,4 @@
+test_files/ascii2.input: ASCII text
+test_files/ascii.input:  ASCII text
+test_files/data.input:   data
+test_files/empty.input:  empty

@@ -191,17 +191,13 @@ int CheckForUTF8(FILE* stream){
 						
 			default:
 				// case 0xxxxxxx base 2
-				if((unsigned char)str[0] < 0x80){
+				if((unsigned char)str[0] < 0x80 && !0x00){
 					fseek(stream, -3, SEEK_CUR);
 					break;
 				}
 				// all other case are faults 
 				ret = DATA;
 				break;
-		}
-		
-		if(ret == DATA){
-			break;
 		}
 	}
 
@@ -216,19 +212,24 @@ int CheckForUTF16(FILE* stream){
 	// return value reflex index of answer array.
 	int ret = DATA;
 	
-	char str[3] = { 0 };
+	char c1 = fgetc(stream);
+	char c2 = fgetc(stream);
 
-	// Loading first 2 char of the file.
-	fgets(str, 2, stream);
+	switch(c1){
 
-	// Testing for UFT16 indicators
-	if(strcmp(str, "\xFF\xFE")==0){
-		ret = LITTLE_UTF16;
+		case '\xFF':
+		if(c2 == '\xFE'){
+			ret = LITTLE_UTF16;
+		}
+		break;
+
+		case '\xFE':
+		if(c2 == '\xFF'){
+			ret = BIG_UTF16;
+		}
+		break;
 	}
-
-	if(strcmp(str, "\xFE\xFF")==0){
-		ret = BIG_UTF16;
-	}
+	
 	
 	fseek(stream,0,SEEK_SET);
 	return ret;
@@ -294,13 +295,13 @@ int main(int argc, char *argv[]){
 				// uses function that check the stream for none ascii chars.
 				index = CheckForAscii(stream);
 			}
-			
-			if(index == DATA){
-				index = CheckForISO(stream);
-			}
 
 			if(index == DATA){
 				index = CheckForUTF8(stream);
+			}
+			
+			if(index == DATA){
+				index = CheckForISO(stream);
 			}
 		}
 		
