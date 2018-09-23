@@ -136,9 +136,15 @@ int CheckForUTF8(FILE* stream){
 		// and the 2 most left to either 1 or 0
 		// 0xc0 base 16 = 11000000 base 2
 <<<<<<< HEAD
+<<<<<<< HEAD
 		unsigned char  sectest = str[1] & 0xc0;
 	 	unsigned char  thdtest = str[2] & 0xc0;
 		unsigned char  fthtest = str[3] & 0xc0;
+=======
+		unsigned char sectest = str[1] & 0xc0;
+	 	unsigned char thdtest = str[2] & 0xc0;
+		unsigned char fthtest = str[3] & 0xc0;
+>>>>>>> 172e49e8172bbf4cd01c2f22b7f9a172cd10f1d1
 =======
 		unsigned char sectest = str[1] & 0xc0;
 	 	unsigned char thdtest = str[2] & 0xc0;
@@ -169,8 +175,13 @@ int CheckForUTF8(FILE* stream){
 			case 0xe0:
 				// if not all bytes to most left bits are 10 base 2
 <<<<<<< HEAD
+<<<<<<< HEAD
 				if((sectest & thdtest ) != 0x80){
 				 	ret = 1;
+=======
+				if((sectest | thdtest ) != 0x80){
+				 	ret = DATA;
+>>>>>>> 172e49e8172bbf4cd01c2f22b7f9a172cd10f1d1
 =======
 				if((sectest | thdtest ) != 0x80){
 				 	ret = DATA;
@@ -193,7 +204,11 @@ int CheckForUTF8(FILE* stream){
 				// if not 10xxxxxx base 2
 				if(sectest != 0x80){
 <<<<<<< HEAD
+<<<<<<< HEAD
 				 	ret = 1;
+=======
+				 	ret = DATA;
+>>>>>>> 172e49e8172bbf4cd01c2f22b7f9a172cd10f1d1
 =======
 				 	ret = DATA;
 >>>>>>> 172e49e8172bbf4cd01c2f22b7f9a172cd10f1d1
@@ -296,13 +311,24 @@ int main(int argc, char *argv[]){
 		if(size){
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 			index = CheckForUTF16(stream);
 
 			if(index == 1){
+=======
+			// testing against UFT16 files, and setting index to
+			// either to DATA or UFT16 (big or little endian)
+			index = CheckForUTF16(stream);
+			
+			// assuming that the file are a data file
+			// try to disprove it, trough testing.
+			if(index == DATA){
+>>>>>>> 172e49e8172bbf4cd01c2f22b7f9a172cd10f1d1
 				// uses function that check the stream for none ascii chars.
 				index = CheckForAscii(stream);
 			}
 
+<<<<<<< HEAD
 			if(index == 1){
 				index = CheckForUTF8(stream);
 			}
@@ -320,11 +346,16 @@ int main(int argc, char *argv[]){
 				index = CheckForAscii(stream);
 			}
 
+=======
+>>>>>>> 172e49e8172bbf4cd01c2f22b7f9a172cd10f1d1
 			if(index == DATA){
 				index = CheckForUTF8(stream);
 			}
 			
 			if(index == DATA){
+<<<<<<< HEAD
+>>>>>>> 172e49e8172bbf4cd01c2f22b7f9a172cd10f1d1
+=======
 >>>>>>> 172e49e8172bbf4cd01c2f22b7f9a172cd10f1d1
 				index = CheckForISO(stream);
 			}
