@@ -3,6 +3,22 @@
 #include<string.h>	// strerror.
 #include<errno.h>	// errno.
 
+// ( 10xxxxxx >> 6 == 00000010 )
+#define UTF8_CONT(x)	( ((x >> 6) == 0x2) ? 1 : 0 )
+
+// ( 110xxxxx >> 5 == 00000110 )
+#define UTF8_2B(x)		( ((x >> 5) == 0x6)  ? 1 : 0 )
+
+// ( 1110xxxx >> 4 == 00001110 )
+#define UTF8_3B(x)		( ((x >> 4) == 0xE)  ? 1 : 0 )
+
+// ( 11110xxx >> 3 == 00011110 )
+#define UTF8_4B(x)		( ((x >> 3) == 0x1E) ? 1 : 0 )
+
+
+
+
+
 // an array were we can index the given answer
 char* answers[7] = {
 	"empty", 
@@ -156,7 +172,7 @@ int CheckForUTF8(FILE* stream){
 			// case 11100000 base 2
 			case 0xe0:
 				// if not all bytes to most left bits are 10 base 2
-				if((sectest | thdtest ) != 0x80){
+				if((sectest | thdtest) != 0x80){
 				 	ret = DATA;
 
 					break;
@@ -176,11 +192,9 @@ int CheckForUTF8(FILE* stream){
 			case 0xc0:
 				// if not 10xxxxxx base 2
 				if(sectest != 0x80){
-				 	ret = 1;
-
 				 	ret = DATA;
 
-					 break;
+					break;
 				}
 				// set the stream pointer 2 bytes back.
 				fseek(stream, -2,SEEK_CUR);
