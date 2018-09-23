@@ -53,9 +53,10 @@ int CheckForData(FILE* stream){
 	}
 
 	// reset file pointer
-	fseek(stream,0,SEEK_SET);
+	fseek(stream, 0, SEEK_SET);
 	return ret;
 }
+
 
 // TODO remember to add the function to the main function
 // and add comment on what this function does.
@@ -70,9 +71,10 @@ int CheckForISO(FILE* stream){
 	*/
 	
 	// reset stream pointer to start of the file
-	fseek(stream,0,SEEK_SET);
+	fseek(stream, 0, SEEK_SET);
 	return ret;
 }
+
 
 // TODO remember to add the function to the main function
 // and add comment on what this function does.
@@ -188,13 +190,19 @@ int CheckForUTF8(FILE* stream){
 		e.i. for 3 and 4 bytes.
 	*/
 
+<<<<<<< HEAD
 
 
 
 		// reset stream pointer to start of the file
 	fseek(stream,0,SEEK_SET);
+=======
+	// reset stream pointer to start of the file
+	fseek(stream, 0, SEEK_SET);
+>>>>>>> 97fd2c60833eb1e07615a14f9d350afcd4fff5e4
 	return ret;
 }
+
 
 // TODO remember to add the function to the main function
 // and add comment on what this function does.
