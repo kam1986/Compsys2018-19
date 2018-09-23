@@ -28,7 +28,7 @@ int print_error(char *path, int errnum){
 
 
 // check for none ascci data charachters
-int CheckForData(FILE* stream){
+int CheckForAscii(FILE* stream){
 	char c;
 
 	int ret = 2;
@@ -85,7 +85,7 @@ int CheckForUTF8(FILE* stream){
 
 	// String for searching the file.
 	// (4 char + 1 string terminator) 
-	char* str[5] = { 0 };
+	char str[5] = { 0 };
 
 	while(ret == 4){
 		// read the next 4 char of the string
@@ -98,7 +98,7 @@ int CheckForUTF8(FILE* stream){
 		}
 		// set the last 3 bits to 0
 		// e.i (0xf8 base 16 = 11111000 base 2)
-		char fsttest = str[0] & 0xf8;
+		unsigned char fsttest = str[0] & 0xf8;
 		// ex. 11101111 & 11111000 = 11101000
 		// if any of the 5 left bit in str[0] are 0,
 		// then the result is 0 for that bit
@@ -107,13 +107,13 @@ int CheckForUTF8(FILE* stream){
 		// set the 6 most right bits to 0
 		// and the 2 most left to either 1 or 0
 		// 0xc0 base 16 = 11000000 base 2
-		char sectest = str[1] & 0xc0;
-	 	char thdtest = str[2] & 0xc0;
-		char fthtest = str[3] & 0xc0;
+		unsigned char  sectest = str[1] & 0xc0;
+	 	unsigned char  thdtest = str[2] & 0xc0;
+		unsigned char  fthtest = str[3] & 0xc0;
 		// 0x80 base 16 = 10000000 base 2
 		// if any of the three above chars has the
-		// bit sequence  1100000 the the checks will return a 
-		// none-valid checkwith value 0xc0 where a valid sequence 
+		// bit sequence 1100000 the test will return a 
+		// none-valid test with value 0xc0 where a valid sequence 
 		// will have 10000000 with value 0x80
 		
 
@@ -136,7 +136,7 @@ int CheckForUTF8(FILE* stream){
 				// if not all bytes to most left bits are 10 base 2
 				if((sectest & thdtest ) != 0x80){
 				 	ret = 1;
-					break
+					break;
 				}
 				// set the stream pointer 1 byte back.
 				fseek(stream, -1,SEEK_CUR);
@@ -150,7 +150,7 @@ int CheckForUTF8(FILE* stream){
 				// if not all bytes to most left bits are 10 base 2
 				if(sectest != 0x80){
 				 	ret = 1;
-					 break
+					 break;
 				}
 				// set the stream pointer 2 bytes back.
 				fseek(stream, -2,SEEK_CUR);
@@ -178,6 +178,7 @@ int CheckForUTF8(FILE* stream){
 	return ret;
 }
 
+
 // TODO remember to add the function to the main function
 // and add comment on what this function does.
 int CheckForUTF16(FILE* stream){
@@ -197,9 +198,6 @@ int main(int argc, char *argv[]){
 	FILE *stream;	
 	 
 	size_t size=0;
-
-
-
 
 	// index to answer array.
 	int index = 0;
@@ -234,20 +232,24 @@ int main(int argc, char *argv[]){
 		// reset stream pointer to head of the stream.
 		fseek(stream, 0, SEEK_SET);
 
-		
-		
-
 		// test for empty file	
 		// TODO Insert functions in correct order
 		if(size){
 
-			index = CheckForUTF8(stream);
+			index = CheckForUTF16(stream);
 
 			if(index == 1){
 				// uses function that check the stream for none ascii chars.
-				index = CheckForData(stream);
+				index = CheckForAscii(stream);
 			}
 
+			if(index == 1){
+				index = CheckForUTF8(stream);
+			}
+
+			if(index == 1){
+				index = CheckForISO(stream);
+			}
 		}
 		
 		
