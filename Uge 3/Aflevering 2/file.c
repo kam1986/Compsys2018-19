@@ -17,6 +17,15 @@ char* answers[7] = {
 	"Big-endian UTF-16 Unicode"
 };
 
+enum Type {
+	EMPTY = 0,
+	DATA = 1,
+	ASCII = 2,
+	ISO = 3,
+	UTF8 = 4,
+	LITTLE_UTF16 = 5,
+	BIG_UTF16 = 6,
+};
 
 
 // print correct error for handling corrupt and missing files.
@@ -31,7 +40,8 @@ int print_error(char *path, int errnum){
 int CheckForAscii(FILE* stream){
 	char c;
 
-	int ret = 2;
+	// assume ascii
+	int ret = ASCII;
 
 	while(1){
 				
@@ -45,8 +55,8 @@ int CheckForAscii(FILE* stream){
 		// test for none-ASCII text characters
 		// if c in not in the set describet ad p. 4 assignment 0.
 		if((c < 0x20 && (c < 0x07 || c > 0x0D) && c != 0x1B) || c > 0x7E){
-			// set size to the correct index
-			ret = 1;
+			// prooved not ascii
+			ret = DATA;
 			break;			
 		}
 		
@@ -61,15 +71,32 @@ int CheckForAscii(FILE* stream){
 // and add comment on what this function does.
 int CheckForISO(FILE* stream){
 	// return value reflex index of answer array.
-	int ret = 4;
-	
-	// make ISO check function
-	/* 	check if check if ther exist a char c
-		such that 159 < c < 255
-		OBS! do not need to check for ascii chars
-	*/
-	
-	// reset stream pointer to start of the file
+	unsigned char c;
+
+	// assume ascii
+	int ret = ISO;
+
+	while(1){
+				
+		c = fgetc(stream);
+
+		// breaks loop if we get a eof char (End Of File).
+		if(feof(stream)) {
+			break;
+		}
+
+		// test for none-ISO text characters
+		// if c in not in the set describet ad p. 4 assignment 0.
+		if((c < 0x20 && (c < 0x07 || c > 0x0D) && c != 0x1B)
+			|| (0x80 < c && c < 0xA0)){
+			// prooved not ISO
+			ret = DATA;
+			break;			
+		}
+		
+	}
+
+	// reset file pointer
 	fseek(stream,0,SEEK_SET);
 	return ret;
 }
@@ -80,20 +107,21 @@ int CheckForISO(FILE* stream){
 // Is been worked on - Kasper
 
 int CheckForUTF8(FILE* stream){
-	// return value reflex index of answer array.
-	int ret = 1;
+	// return value.
+	int ret = UTF8;
 
 	// String for searching the file.
 	// (4 char + 1 string terminator) 
 	char str[5] = { 0 };
 
-	while(ret == 4){
+	while(ret == UTF8){
 		// read the next 4 char of the string
 		// increament the stream pointer by 4 bytes
 		fgets(str, 4, stream);
 		
 
 		if(feof(stream)){
+			// need to handle end of file
 			break;
 		}
 		// set the last 3 bits to 0
@@ -107,9 +135,15 @@ int CheckForUTF8(FILE* stream){
 		// set the 6 most right bits to 0
 		// and the 2 most left to either 1 or 0
 		// 0xc0 base 16 = 11000000 base 2
+<<<<<<< HEAD
 		unsigned char  sectest = str[1] & 0xc0;
 	 	unsigned char  thdtest = str[2] & 0xc0;
 		unsigned char  fthtest = str[3] & 0xc0;
+=======
+		unsigned char sectest = str[1] & 0xc0;
+	 	unsigned char thdtest = str[2] & 0xc0;
+		unsigned char fthtest = str[3] & 0xc0;
+>>>>>>> 172e49e8172bbf4cd01c2f22b7f9a172cd10f1d1
 		// 0x80 base 16 = 10000000 base 2
 		// if any of the three above chars has the
 		// bit sequence 1100000 the test will return a 
@@ -119,37 +153,50 @@ int CheckForUTF8(FILE* stream){
 
 		switch(fsttest){
 
-			// case when 3 bytes follows in the UTF8 char
+			// case 4
 			// case 11110000 base 2
 			case 0xf0:
 				// if not all bytes to most left bits are 10 base 2
-				if((sectest & thdtest & fthtest) != 0x80){
-				 	ret = 1;
+				if((sectest | thdtest | fthtest) != 0x80){
+				 	ret = DATA;
 				}
 				break;
 			
-			// both cases when 2 bytes follows in the UTF8 char
+			// case 3
 			// case 11101000 base 2 
 			case 0xe8:
 			// case 11100000 base 2
 			case 0xe0:
 				// if not all bytes to most left bits are 10 base 2
+<<<<<<< HEAD
 				if((sectest & thdtest ) != 0x80){
 				 	ret = 1;
+=======
+				if((sectest | thdtest ) != 0x80){
+				 	ret = DATA;
+>>>>>>> 172e49e8172bbf4cd01c2f22b7f9a172cd10f1d1
 					break;
 				}
 				// set the stream pointer 1 byte back.
 				fseek(stream, -1,SEEK_CUR);
 				break;
 
-			// both cases when 1 byte follows in the UTF8 char
-			// case 11001000
+			// cases 2
+			// case 11011xxx base 2
+			case 0xd8:
+			// case 11010xxx base 2
+			case 0xd0:
+			// case 11001xxx base 2
 			case 0xc8:
-			// case 1100000 base 2
+			// case 11000xxx base 2
 			case 0xc0:
-				// if not all bytes to most left bits are 10 base 2
+				// if not 10xxxxxx base 2
 				if(sectest != 0x80){
+<<<<<<< HEAD
 				 	ret = 1;
+=======
+				 	ret = DATA;
+>>>>>>> 172e49e8172bbf4cd01c2f22b7f9a172cd10f1d1
 					 break;
 				}
 				// set the stream pointer 2 bytes back.
@@ -159,18 +206,14 @@ int CheckForUTF8(FILE* stream){
 						
 			default:
 				// case 0xxxxxxx base 2
-				if((fsttest & 0x80) < 0x80){
+				if((unsigned char)str[0] < 0x80 && !0x00){
 					fseek(stream, -3, SEEK_CUR);
 					break;
 				}
 				// all other case are faults 
-				ret = 1;
+				ret = DATA;
 				break;
-			
-
 		}
-		
-		return ret;
 	}
 
 	// reset stream pointer to start of the file
@@ -183,11 +226,27 @@ int CheckForUTF8(FILE* stream){
 // and add comment on what this function does.
 int CheckForUTF16(FILE* stream){
 	// return value reflex index of answer array.
-	ret = 1;
+	int ret = DATA;
 	
-	// make UFT16 check function
-	// check first to bytes as described in the assignment.
-	// reset stream pointer to start of the file
+	char c1 = fgetc(stream);
+	char c2 = fgetc(stream);
+
+	switch(c1){
+
+		case '\xFF':
+		if(c2 == '\xFE'){
+			ret = LITTLE_UTF16;
+		}
+		break;
+
+		case '\xFE':
+		if(c2 == '\xFF'){
+			ret = BIG_UTF16;
+		}
+		break;
+	}
+	
+	
 	fseek(stream,0,SEEK_SET);
 	return ret;
 }
@@ -236,6 +295,7 @@ int main(int argc, char *argv[]){
 		// TODO Insert functions in correct order
 		if(size){
 
+<<<<<<< HEAD
 			index = CheckForUTF16(stream);
 
 			if(index == 1){
@@ -248,6 +308,24 @@ int main(int argc, char *argv[]){
 			}
 
 			if(index == 1){
+=======
+			// testing against UFT16 files, and setting index to
+			// either to DATA or UFT16 (big or little endian)
+			index = CheckForUTF16(stream);
+			
+			// assuming that the file are a data file
+			// try to disprove it, trough testing.
+			if(index == DATA){
+				// uses function that check the stream for none ascii chars.
+				index = CheckForAscii(stream);
+			}
+
+			if(index == DATA){
+				index = CheckForUTF8(stream);
+			}
+			
+			if(index == DATA){
+>>>>>>> 172e49e8172bbf4cd01c2f22b7f9a172cd10f1d1
 				index = CheckForISO(stream);
 			}
 		}
