@@ -29,6 +29,14 @@
 #define CALL 0xE
 
 
+// minor opcodes
+#define ADD 0x0
+#define SUB 0x1
+#define AND 0x2
+#define OR  0x3
+#define XOR 0x4
+#define MUL 0x5
+
 
 int main(int argc, char* argv[]) {
     // Check command line parameters.
@@ -86,13 +94,13 @@ int main(int argc, char* argv[]) {
         val minor_op = pick_bits(0,  4, inst_bytes[0]); // not actually used yet
 
 
-        // codes for which of the regs are d and s regs
+        // bit-codes for which of the regs are d and s regs e.i. '0 .. 15'
         val reg_d = pick_bits(4, 4, inst_bytes[1]);
         val reg_s = pick_bits(0, 4, inst_bytes[1]);
 
         // decode instruction type
         // read major operation code
-        bool is_return = is(RETURN, major_op);//???
+        bool is_return = is(RETURN, major_op);// should not be removed!!
         // Add further decoding from here
 
 
@@ -100,30 +108,144 @@ int main(int argc, char* argv[]) {
 
             // reg -> reg
             case REG_MOVQ: // uses page 423
-                // fetch the value from source reg 
-                val value = reg_read(regs, reg_s);
-                
+
+                // OBS!! may not done ask about line 4-5 encoding.txt
+
+                // set instruction size for this instruction
+                val ins_size = from_int(2);
+
+                // control signals for memory access 
+                bool is_load = false;
+                bool is_store= false;
+
+                // setting up register read and write 
+                val reg_read_dz = reg_d; // ?? not sure it should be reg_s instead
+                // - other read port is always reg_s
+                // - write is always to reg_d
+                bool reg_wr_enable = true;
+
+                // fetch the value from source reg
+                val valA = reg_read(regs, reg_s);
+
                 // write the value to destination reg
                 reg_write(regs, reg_d, value);
                 break;
 
             // reg -> mem
             case REG_MOVQ_MEM:
-                
+                // set instruction size for this instruction
+                val ins_size = from_int(3);
+
+                // TODO - missing code here
+
                 break;
 
             // initiating a reg
             case IMM_MOVQ
-            break;
+                // set instruction size for this instruction
+                val ins_size = from_int(2);
+
+                // TODO - missing code here
+
+                break;
             
-            // 
+            //  
             case IMM_MOVQ_MEM:
-            break;
+                // set instruction size for this instruction
+                val ins_size = from_int(3);
+
+                // TODO - missing code here
+
+                break;
             
+
+            // arithetic instructions from here
+
+            // add, sub, mul, div, and, or e.i reg -> reg
+            case REG_ARITHMETIC:
+
+                // set instruction size for this instruction
+                // no IMM or memory read/write
+                val ins_size = from_int(2);
+
+                // operation pointer will be set below
+                void (*op)(val);
+
+                val valA = reg_read(regs, reg_s);
+                val valB = reg_read(regs, reg_d);
+
+                
+                switch(minor_op){
+                    case ADD:
+                        // setting operation to add
+                        op = &add;
+                        break;
+                    
+                    case SUB:
+                        // setting operation to sub (add and source value negated)
+                        op = &add;
+                        valA.val = -valA.val;
+                        break;
+
+                    case AND:
+                        op = &and;
+                        break;
+
+                    case OR:
+                        op = &or;
+                        break;
+
+                    case XOR:
+                        op = &xor;
+                        break;
+                        
+                    case MUL:
+                        op = &mul;
+                        break;
+                        
+                }
+
+                // dose the proper operaton on the regs
+                reg_write(regs, reg_d, (*op)(valA,valB));
+                
+                break;
+
+            // as above just "reg <- reg op imm"
+            case IMM_ARITHMETIC:
+
+                // set instruction size for this instruction
+                val ins_size = from_int(3);
+
+                switch(minor_op){
+                    case ADD:
+                        break;
+                    
+                    case SUB:
+                        break;
+
+                    case AND:
+                        break;
+
+                    case OR:
+                        break;
+
+                    case XOR:
+                        break;
+                        
+                    case MUL:
+                        break;
+                        
+                }
+
+                break;
 
 
             case JMP:
-            break;
+                // set instruction size for this instruction
+                val ins_size = from_int(3);
+
+                // TODO - missing code here
+                break;
 
            // -------------------- cases are still missing.. ----------------------//
 
