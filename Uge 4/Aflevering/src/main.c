@@ -16,23 +16,22 @@
 #define REG_MOVQ       0x2 // reg       ->  reg   - size 2
 #define REG_MOVQ_MEM   0x3 // reg       <-> mem   - size 2
 #define CFLOW          0x4 // ??
-#define IMM_ARITHMETIC 0x5 // imm       ->  reg   - size 3
-#define IMM_MOVQ       0x6 // imm       ->  reg   - size 3
-#define IMM_MOVQ_MEM   0x7 // imm mem   <-> reg   - size 3
+#define IMM_ARITHMETIC 0x5 // imm       ->  reg   - size 6
+#define IMM_MOVQ       0x6 // imm       ->  reg   - size 6
+#define IMM_MOVQ_MEM   0x7 // imm mem   <-> reg   - size 6
 #define LEAQ2          0x8 // reg       ->  reg   - size 2
 #define LEAQ3          0x9 // reg       ->  reg   - size 3
-#define LEAQ6          0xA // reg       ->  reg   - size 3
-#define LEAQ7          0xB // reg       ->  reg   - size 4
+#define LEAQ6          0xA // reg       ->  reg   - size 6
+#define LEAQ7          0xB // reg       ->  reg   - size 7
 #define IMM_CBRANCH    0xF // 
 
 // minor opcodes memory
-#define MR      0x1 // reg      -> mem
-#define IMREG   0x4 // imm      -> reg
-#define IRM     0x5 // reg      -> imm mem
-#define RM      0x9 // mem      -> reg
-#define IMR     0xD // imm mem  -> reg
+#define MEM_FROM_REG         0x1 // reg      -> mem
+#define IMM_TO_REG           0x4 // imm      -> reg
+#define IMM_Reg_FROM_MEM     0x5 // reg      -> imm mem
+#define REG_FROM_MEM         0x9 // mem      -> reg
+#define IMM_MEM_FROM_REG     0xD // imm mem  -> reg
 
-// minor opcodes
 
 // minor opcodes
 #define JMP     0xF
@@ -42,7 +41,9 @@
 
 #define SIZE2  from_int(2)
 #define SIZE3  from_int(3)
-#define SIZE4  from_int(4)
+#define SIZE6  from_int(6)
+#define SIZE7  from_int(7)
+#define SIZE10 from_int(10)
 
 int main(int argc, char* argv[]) {
     // Check command line parameters.
@@ -108,61 +109,114 @@ int main(int argc, char* argv[]) {
         
         // Add further decoding from here - DONE
 
-        /* 2 */ bool is_reg_arithmetic  = is(REG_ARITHMETIC, major_op);
-        /* 2 */ bool is_reg_movq        = is(REG_MOVQ, major_op);
-        /* 2 */ bool is_reg_movq_mem    = is(REG_MOVQ_MEM, major_op);
-        /* ? */ bool is_cflow           = is(CFLOW, major_op);
-        /* 3 */ bool is_imm_arithmetic  = is(IMM_ARITHMETIC, major_op);
-        /* 3 */ bool is_imm_movq        = is(IMM_MOVQ, major_op);
-        /* 3 */ bool is_imm_movq_mem    = is(IMM_MOVQ_MEM, major_op);
-        /* 2 */ bool is_leaq2           = is(LEAQ2, major_op);
-        /* 3 */ bool is_leaq3           = is(LEAQ3, major_op);
-        /* 3 */ bool is_leaq6           = is(LEAQ6, major_op);
-        /* 4 */ bool is_leaq7           = is(LEAQ7, major_op);
-             
+        bool is_reg_arithmetic  = is(REG_ARITHMETIC, major_op);
+        bool is_reg_movq        = is(REG_MOVQ, major_op);
+        bool is_reg_movq_mem    = is(REG_MOVQ_MEM, major_op);
+        //bool is_cflow           = is(CFLOW, major_op);
+        bool is_imm_arithmetic  = is(IMM_ARITHMETIC, major_op);
+        bool is_imm_movq        = is(IMM_MOVQ, major_op);
+        bool is_imm_movq_mem    = is(IMM_MOVQ_MEM, major_op);
+        bool is_leaq2           = is(LEAQ2, major_op);
+        bool is_leaq3           = is(LEAQ3, major_op);
+        bool is_leaq6           = is(LEAQ6, major_op);
+        bool is_leaq7           = is(LEAQ7, major_op);
 
-        bool is_imm = 
-            or(is_imm_arithmetic,
-            or(is_imm_movq,
-               is_imm_movq_mem,));
+        val is_size2  =
+            use_if(is_reg_arithmetic 
+                || is_reg_movq 
+                || is_reg_movq_mem 
+                || is_leaq2 
+                || is_return, SIZE2);
 
-        bool is_lea = 
-            or(is_leaq2,
-            or(is_leaq3,
-            or(is_leaq6,
-               is_leaq7)));
+        val is_size3  = use_if(is_leaq3, SIZE3);
+        val is_size6  = 
+            use_if(is_leaq6
+                || is_imm_arithmetic
+                || is_imm_movq
+                || is_imm_movq_mem, SIZE6);
 
-        // set this to 0 if not size 3
-        val is_size3 =
-                use_if(
-                    or(is_imm_arithmetic,
-                    or(is_imm_movq,
-                    or(is_imm_movq_mem,
-                    or(is_leaq3,
-                       is_leaq6)))),
-                    SIZE3
-                );
+        val is_size7  = use_if(is_leaq7, SIZE7);
+        val is_size10 = use_if(false, SIZE10);// not implementet yet
 
-        // set this to 0 if not size 4
-        val is_size4 = use_if(is_leaq7,SIZE4);
-        
-        // determine instruction size - 2,3 or 4
         val ins_size =
-            or(is_size3, 
-            or(is_size4, 
-               SIZE2));  // default value for size
+            or(is_size2,
+                or(is_size3,
+                    or(is_size6,
+                        or(is_size7, is_size10)
+                    )
+                )
+            );
 
 
+        // extra values that might (not) be needed
+        val shiftamount = 
+            use_if(is_leaq3 || is_leaq7, pick_bits(0, 4, inst_bytes[2]));
+        
+        val reg_z =
+            use_if(is_leaq3 || is_leaq7, pick_bits(4, 4, inst_bytes[2]));
+
+        // first pp .. 32 .. pp or ii .. 32 .. ii argument
+        val arg1 = 
+            or(
+                use_if(is_size6.val == 6 || is_size10.val == 10,
+                    add(put_bits(24, 8, inst_bytes[2]),
+                        add(put_bits(16, 8, inst_bytes[3]),
+                            add(put_bits(8,8,inst_bytes[4]),
+                                put_bits(0,8,inst_bytes[5])
+                            )
+                        )
+                    )
+                ),
+                use_if(is_size7.val == 7,
+                    add(put_bits(24, 8, inst_bytes[3]),
+                        add(put_bits(16, 8, inst_bytes[4]),
+                            add(put_bits(8,8,inst_bytes[5]),
+                                put_bits(0,8,inst_bytes[6])
+                            )
+                        )
+                    )
+                )
+            );
+            
+        // second pp .. 32 .. pp argument not used yet
+        /* val arg2 = 
+            use_if(is_size10.val == 10,
+                add(put_bits(24, 8, inst_bytes[6]),
+                    add(put_bits(16, 8, inst_bytes[7]),
+                        add(put_bits(8,8,inst_bytes[8]),
+                            put_bits(0,8,inst_bytes[9])
+                        )
+                    )
+                )
+            );
+        */
 
         // control signals for memory access - you will want to change these
-        bool is_load = false;
-        bool is_store= false;
+        bool is_load  = (is_reg_movq_mem && is(REG_FROM_MEM, minor_op)) 
+                     || (is_imm_movq_mem && is(IMM_Reg_FROM_MEM, minor_op));
+                
+        bool is_store = (is_reg_movq_mem && is(MEM_FROM_REG, minor_op)) 
+                     || (is_imm_movq_mem && is(IMM_MEM_FROM_REG, minor_op)); 
+
+        // control signal for immediate value
+        bool is_imm = is_imm_arithmetic 
+                   || is_imm_movq 
+                   || is_imm_movq_mem 
+                   || is_leaq6
+                   || is_leaq7;
 
         // setting up register read and write - you will want to change these
-        val reg_read_dz = reg_d; // for return we just need reg_d
+        val reg_read_dz = 
+            or(
+                use_if(is_size3.val == 3 || is_size7.val == 7, reg_z),
+                use_if(!(is_size3.val == 3 || is_size7.val == 7), reg_d)
+            );
+
+
         // - other read port is always reg_s
         // - write is always to reg_d
-        bool reg_wr_enable = false;
+        bool reg_wr_enable = !(is_store || is_load);
+        // ^ above compute if we only use regs ^
 
         /*** EXECUTE ***/
         // read registers
@@ -172,10 +226,19 @@ int main(int argc, char* argv[]) {
         // perform calculations - Return needs no calculation. you will want to change this.
         // Here you should hook up a call to compute_execute with all the proper
         // arguments in place
-        val compute_result = compute_execute(
-                            // TODO need to give the right input.
-
-                            ).val; // you will want to change this.
+        val compute_result = 
+            compute_execute(
+                reg_out_a,                                 // either register d or z
+                reg_out_b,                                 // always register s
+                arg1,                                      // immediate value
+                true,                                      // should be changed
+                true,                                      // should be changed
+                is_imm,                                    // if immediate value is used
+                shiftamount,                               // amount to shift
+                !(is_imm_arithmetic || is_reg_arithmetic), // if not arithmetic
+                minor_op,
+                minor_op
+            ).result; // you will want to change this.
 
         // succeeding instruction in memory
         val pc_inc  = add(pc, ins_size);
@@ -192,7 +255,11 @@ int main(int argc, char* argv[]) {
 
         /*** WRITE ***/
         // choose result to write back to register
-        val datapath_result = from_int(0); // no result for return - you will want to change this
+        val datapath_result = 
+            or(
+                use_if(is_load, mem_out),
+                use_if(!is_load, compute_result)
+            ); // no result for return - you will want to change this
 
         // NO CHANGES NEEDED AFTER THIS LINE
 
