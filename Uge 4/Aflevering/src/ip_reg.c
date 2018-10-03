@@ -12,7 +12,6 @@
 struct ip_register {
     trace_p tracer;
     val data;
-    
 };
 
 ip_reg_p ip_reg_create() {

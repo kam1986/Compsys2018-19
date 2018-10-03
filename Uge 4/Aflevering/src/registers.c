@@ -18,7 +18,6 @@ reg_p regs_create() {
     reg_p regs = (reg_p) malloc(sizeof(struct registers));
     for (int i = 0; i < 16; ++i)
         regs->data[i] = from_int(0);
-        
     regs->tracer = 0;
     return regs;
 }

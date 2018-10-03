@@ -31,8 +31,6 @@ val zip(hilo values) {
     return from_int(result);
 }
 
-// lbs = least significant bit, it pushes the bits to the left
-// then takes the sz left most bits and convert them to a val.
 val pick_bits(int lsb, int sz, val value) {
     uint64_t v = value.val;
     v >>= lsb;
