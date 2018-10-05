@@ -201,12 +201,12 @@ int main(int argc, char* argv[]) {
 
         // control signals for memory access - you will want to change these
         bool is_load  = (is_reg_movq_mem && is(REG_FROM_MEM, minor_op)) 
-                     || (is_imm_movq_mem && is(IMM_Reg_FROM_MEM, minor_op))
-                     || !is_return;
+                     || (is_imm_movq_mem && is(IMM_Reg_FROM_MEM, minor_op));
+                     
                 
         bool is_store = (is_reg_movq_mem && is(MEM_FROM_REG, minor_op)) 
-                     || (is_imm_movq_mem && is(IMM_MEM_FROM_REG, minor_op))
-                     || !is_return; 
+                     || (is_imm_movq_mem && is(IMM_MEM_FROM_REG, minor_op));
+                     
 
         printf("is_load is %d, is_store is %d\n\n", is_load, is_store);
 
