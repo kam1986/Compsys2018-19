@@ -15,7 +15,7 @@
 #define REG_ARITHMETIC 0x1 // reg       ->  reg   - size 2
 #define REG_MOVQ       0x2 // reg       ->  reg   - size 2
 #define REG_MOVQ_MEM   0x3 // reg       <-> mem   - size 2
-#define CFLOW          0x4 // ??
+#define CFLOW          0x4 // control flow        - size 6
 #define IMM_ARITHMETIC 0x5 // imm       ->  reg   - size 6
 #define IMM_MOVQ       0x6 // imm       ->  reg   - size 6
 #define IMM_MOVQ_MEM   0x7 // imm mem   <-> reg   - size 6
@@ -23,7 +23,7 @@
 #define LEAQ3          0x9 // reg       ->  reg   - size 3
 #define LEAQ6          0xA // reg       ->  reg   - size 6
 #define LEAQ7          0xB // reg       ->  reg   - size 7
-#define IMM_CBRANCH    0xF // 
+#define IMM_CBRANCH    0xF // branching           - size 10
 
 // minor opcodes memory
 #define MEM_FROM_REG         0x1 // reg      -> mem
@@ -112,7 +112,7 @@ int main(int argc, char* argv[]) {
         bool is_reg_arithmetic  = is(REG_ARITHMETIC, major_op);
         bool is_reg_movq        = is(REG_MOVQ, major_op);
         bool is_reg_movq_mem    = is(REG_MOVQ_MEM, major_op);
-        //bool is_cflow           = is(CFLOW, major_op);
+        bool is_cflow           = is(CFLOW, major_op);
         bool is_imm_arithmetic  = is(IMM_ARITHMETIC, major_op);
         bool is_imm_movq        = is(IMM_MOVQ, major_op);
         bool is_imm_movq_mem    = is(IMM_MOVQ_MEM, major_op);
@@ -129,14 +129,17 @@ int main(int argc, char* argv[]) {
                 || is_return, SIZE2);
 
         val is_size3  = use_if(is_leaq3, SIZE3);
+
         val is_size6  = 
             use_if(is_leaq6
                 || is_imm_arithmetic
                 || is_imm_movq
-                || is_imm_movq_mem, SIZE6);
+                || is_imm_movq_mem
+                || is_cflow, SIZE6);
 
         val is_size7  = use_if(is_leaq7, SIZE7);
-        val is_size10 = use_if(false, SIZE10);// not implementet yet
+
+        val is_size10 = use_if(false, SIZE10);// not yet used to imm branching
 
         val ins_size =
             or(is_size2,
@@ -223,7 +226,7 @@ int main(int argc, char* argv[]) {
         val reg_out_a = reg_read(regs, reg_read_dz);
         val reg_out_b = reg_read(regs, reg_s);
 
-        // perform calculations - Return needs no calculation. you will want to change this.
+        // perform calculations
         // Here you should hook up a call to compute_execute with all the proper
         // arguments in place
         val compute_result = 
@@ -238,7 +241,7 @@ int main(int argc, char* argv[]) {
                 !(is_imm_arithmetic || is_reg_arithmetic), // if not arithmetic
                 minor_op,
                 minor_op
-            ).result; // you will want to change this.
+            ).result; 
 
         // succeeding instruction in memory
         val pc_inc  = add(pc, ins_size);
@@ -257,8 +260,8 @@ int main(int argc, char* argv[]) {
         // choose result to write back to register
         val datapath_result = 
             or(
-                use_if(is_load, mem_out),
-                use_if(!is_load, compute_result)
+                use_if(is_load, mem_out),           // if loading from memory
+                use_if(!is_load, compute_result)    // if LEAQ or moveQ reg_d reg_s
             ); // no result for return - you will want to change this
 
         // NO CHANGES NEEDED AFTER THIS LINE
