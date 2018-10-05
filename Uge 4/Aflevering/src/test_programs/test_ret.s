@@ -1,0 +1,2 @@
+runtest:
+    ret %r15

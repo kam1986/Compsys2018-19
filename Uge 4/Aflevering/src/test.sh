@@ -1,38 +1,34 @@
 #!/usr/bin/env bash
 
+# Test programs written in x86prime are expected to be located in a subdirectory 
+#   called test_programs. The file extension of the files are ".s"
+#    TODO: Make more tests and put them in test_programs/.
+
 # Exit immediately if any command below fails.
 set -e
 
+# Make sure that the latest version of simulator is build
 make
 
+# The command with which you run x86prime: You should likely change this variable
+X86PRIME=../x86prime/x86prime.native
+# The name of the function to run in the following is "runtest"
+TESTMAIN=runtest
 
-echo "Generating a test_files directory.."
-mkdir -p test_files
-rm -f test_files/*
-
-
-echo "Generating test files.."
-printf "Hello, World!\n" > test_files/ascii.input
-printf "Hello, World!" > test_files/ascii2.input
-printf "Hello,\x00World!\n" > test_files/data.input
-printf "" > test_files/empty.input
-### TODO: Generate more test files ###
-
+echo "Generating a test_runs directory.."
+mkdir -p test_runs
+rm -f test_runs/*
 
 echo "Running the tests.."
 exitcode=0
-for f in test_files/*.input
-do
+for f in test_programs/*.s; do
   echo ">>> Testing ${f}.."
-  file    "${f}" | sed 's/ASCII text.*/ASCII text/' > "${f}.expected"
-  ./file  "${f}" > "${f}.actual"
+  fname=${f#"test_programs/"}
+  fname=${fname%".s"}
 
-  if ! diff -u "${f}.expected" "${f}.actual"
-  then
-    echo ">>> Failed :-("
-    exitcode=1
-  else
-    echo ">>> Success :-)"
-  fi
+  ${X86PRIME} -f ${f} -asm -list > test_runs/${fname}.hex
+  ${X86PRIME} -f ${f} -asm -run ${TESTMAIN} -tracefile test_runs/${fname}.trc
+  ./sim test_runs/${fname}.hex 0 test_runs/${fname}.trc
 done
+
 exit $exitcode

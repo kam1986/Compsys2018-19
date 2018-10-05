@@ -1,0 +1,43 @@
+make: Nothing to be done for 'all'.
+Generating a test_runs directory..
+Running the tests..
+>>> Testing test_programs/test_imm_movq.s..
+start of new cycle pc is 0
+major : 6
+minor : 4
+
+reg_d : 1
+reg_s : 0
+
+is_return is 0
+
+the instruction size is 6
+
+the reg_z is set to 0
+
+first argument is 4
+
+is_load is 1, is_store is 1
+
+is_imm is 1
+
+reg_dz is 1
+
+reg_wr_enable is 0
+
+reg_out_a : 0
+reg_out_b : 0
+
+use_s is 0, use_d_or_z is 0
+
+compute_result is 4
+
+pc_inc = 6
+
+pc_next = 6
+
+mem_out = 0
+
+reg_d after write is 1
+
+ -- end of tracefile reached, while trying to match 4 <- 0
