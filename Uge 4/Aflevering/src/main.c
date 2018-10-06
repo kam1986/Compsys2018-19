@@ -200,11 +200,11 @@ int main(int argc, char* argv[]) {
         */
 
         // control signals for memory access - you will want to change these
-        bool is_load  = (is_reg_movq_mem && is(REG_FROM_MEM, minor_op)) 
+        bool is_store = (is_reg_movq_mem && is(REG_FROM_MEM, minor_op)) 
                      || (is_imm_movq_mem && is(IMM_Reg_FROM_MEM, minor_op));
                      
                 
-        bool is_store = (is_reg_movq_mem && is(MEM_FROM_REG, minor_op)) 
+        bool is_load = (is_reg_movq_mem && is(MEM_FROM_REG, minor_op)) 
                      || (is_imm_movq_mem && is(IMM_MEM_FROM_REG, minor_op));
                      
 
@@ -229,7 +229,7 @@ int main(int argc, char* argv[]) {
 
         // - other read port is always reg_s
         // - write is always to reg_d
-        bool reg_wr_enable = !(is_return || (is_store || is_load));
+        bool reg_wr_enable = !(is_return || is_store) || is_load;
         printf("reg_wr_enable is %d\n\n", reg_wr_enable);
         // ^ above compute if we only use regs ^
 
@@ -240,8 +240,8 @@ int main(int argc, char* argv[]) {
         printf("reg_out_a : %ld\nreg_out_b : %ld\n\n", reg_out_a.val, reg_out_b.val);
 
 
-        bool use_s      = false;//!(is_return || is_cflow || is_imm_movq );
-        bool use_d_or_z = false;//use_s  || is_reg_movq || is_leaq3 || is_leaq7;
+        bool use_s      = is_store || is_reg_movq || !(is_return || is_cflow || is_imm_movq );
+        bool use_d_or_z = is_leaq3 || is_leaq7;
         printf("use_s is %d, use_d_or_z is %d\n\n", use_s, use_d_or_z);
         // perform calculations
         // Here you should hook up a call to compute_execute with all the proper
@@ -251,8 +251,8 @@ int main(int argc, char* argv[]) {
                 reg_out_a,                                 // either register d or z
                 reg_out_b,                                 // always register s
                 arg1,                                      // immediate value
-                use_d_or_z,                                // should be changed
-                use_s,                                     // should be changed
+                use_d_or_z,                                // is true if the value in reg_red_dz (reg_out_a) should be used for calculation
+                use_s,                                     // is true if the value in reg_s (reg_out_b) should be used for calculation
                 is_imm,                                    // if immediate value is used
                 shiftamount,                               // amount to shift
                 !(is_imm_arithmetic || is_reg_arithmetic), // if not arithmetic
@@ -292,7 +292,7 @@ int main(int argc, char* argv[]) {
 
         // write to memory if needed
         memory_write(mem, compute_result, reg_out_a, is_store);
-
+        printf("if %d = 1 then sim write %ld to location %ld\n\n", is_store, reg_out_a.val, compute_result.val);
         // update program counter
         ip_write(ip, pc_next, true);
 
