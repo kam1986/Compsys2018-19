@@ -1,6 +1,208 @@
 make: Nothing to be done for 'all'.
 Generating a test_runs directory..
 Running the tests..
+>>> Testing test_programs/test_add.s..
+start of new cycle pc is 0
+major : 6
+minor : 4
+
+reg_d : 1
+reg_s : 0
+
+is_return is 0
+
+the instruction size is 6
+
+the reg_z is set to 0
+
+first argument is 2
+
+is_load is 0, is_store is 0
+
+is_imm is 1
+
+reg_dz is 1
+
+reg_wr_enable is 1
+
+reg_out_a : 0
+reg_out_b : 0
+
+use_s is 0, use_d_or_z is 0
+
+compute_result is 2
+
+pc_inc = 6
+
+pc_next = 6
+
+mem_out = 0
+
+reg_d after write is 1
+
+if 0 = 1 then sim write 0 to location 2
+
+start of new cycle pc is 6
+major : 6
+minor : 4
+
+reg_d : 2
+reg_s : 0
+
+is_return is 0
+
+the instruction size is 6
+
+the reg_z is set to 0
+
+first argument is 3
+
+is_load is 0, is_store is 0
+
+is_imm is 1
+
+reg_dz is 2
+
+reg_wr_enable is 1
+
+reg_out_a : 0
+reg_out_b : 0
+
+use_s is 0, use_d_or_z is 0
+
+compute_result is 3
+
+pc_inc = 12
+
+pc_next = 12
+
+mem_out = 0
+
+reg_d after write is 2
+
+if 0 = 1 then sim write 0 to location 3
+
+start of new cycle pc is c
+major : 1
+minor : 0
+
+reg_d : 1
+reg_s : 2
+
+is_return is 0
+
+the instruction size is 2
+
+the reg_z is set to 0
+
+first argument is 0
+
+is_load is 0, is_store is 0
+
+is_imm is 0
+
+reg_dz is 1
+
+reg_wr_enable is 1
+
+reg_out_a : 2
+reg_out_b : 3
+
+use_s is 1, use_d_or_z is 0
+
+compute_result is 5
+
+pc_inc = 14
+
+pc_next = 14
+
+mem_out = 0
+
+reg_d after write is 1
+
+if 0 = 1 then sim write 2 to location 5
+
+start of new cycle pc is e
+major : 5
+minor : 0
+
+reg_d : 1
+reg_s : 0
+
+is_return is 0
+
+the instruction size is 6
+
+the reg_z is set to 0
+
+first argument is 4
+
+is_load is 0, is_store is 0
+
+is_imm is 1
+
+reg_dz is 1
+
+reg_wr_enable is 1
+
+reg_out_a : 5
+reg_out_b : 0
+
+use_s is 1, use_d_or_z is 0
+
+compute_result is 9
+
+pc_inc = 20
+
+pc_next = 20
+
+mem_out = 0
+
+reg_d after write is 1
+
+if 0 = 1 then sim write 5 to location 9
+
+start of new cycle pc is 14
+major : 0
+minor : 0
+
+reg_d : 0
+reg_s : 15
+
+is_return is 1
+
+the instruction size is 2
+
+the reg_z is set to 0
+
+first argument is 0
+
+is_load is 0, is_store is 0
+
+is_imm is 0
+
+reg_dz is 0
+
+reg_wr_enable is 0
+
+reg_out_a : 0
+reg_out_b : 0
+
+use_s is 0, use_d_or_z is 0
+
+compute_result is 0
+
+pc_inc = 22
+
+pc_next = 0
+
+mem_out = 0
+
+reg_d after write is 0
+
+if 0 = 1 then sim write 0 to location 0
+
+Done
 >>> Testing test_programs/test_imm_movq.s..
 start of new cycle pc is 0
 major : 6
@@ -83,409 +285,4 @@ reg_d after write is 0
 if 0 = 1 then sim write 0 to location 0
 
 Done
->>> Testing test_programs/test_reg_movq_mem.s..
-start of new cycle pc is 0
-major : 6
-minor : 4
-
-reg_d : 1
-reg_s : 0
-
-is_return is 0
-
-the instruction size is 6
-
-the reg_z is set to 0
-
-first argument is 4
-
-is_load is 0, is_store is 0
-
-is_imm is 1
-
-reg_dz is 1
-
-reg_wr_enable is 1
-
-reg_out_a : 0
-reg_out_b : 0
-
-use_s is 0, use_d_or_z is 0
-
-compute_result is 4
-
-pc_inc = 6
-
-pc_next = 6
-
-mem_out = 0
-
-reg_d after write is 1
-
-if 0 = 1 then sim write 0 to location 4
-
-start of new cycle pc is 6
-major : 6
-minor : 4
-
-reg_d : 0
-reg_s : 0
-
-is_return is 0
-
-the instruction size is 6
-
-the reg_z is set to 0
-
-first argument is 3
-
-is_load is 0, is_store is 0
-
-is_imm is 1
-
-reg_dz is 0
-
-reg_wr_enable is 1
-
-reg_out_a : 0
-reg_out_b : 0
-
-use_s is 0, use_d_or_z is 0
-
-compute_result is 3
-
-pc_inc = 12
-
-pc_next = 12
-
-mem_out = 0
-
-reg_d after write is 0
-
-if 0 = 1 then sim write 0 to location 3
-
-start of new cycle pc is c
-major : 3
-minor : 9
-
-reg_d : 1
-reg_s : 0
-
-is_return is 0
-
-the instruction size is 2
-
-the reg_z is set to 0
-
-first argument is 0
-
-is_load is 0, is_store is 1
-
-is_imm is 0
-
-reg_dz is 1
-
-reg_wr_enable is 0
-
-reg_out_a : 4
-reg_out_b : 3
-
-use_s is 1, use_d_or_z is 0
-
-compute_result is 3
-
-pc_inc = 14
-
-pc_next = 14
-
-mem_out = 0
-
-reg_d after write is 1
-
-if 1 = 1 then sim write 4 to location 3
-
-start of new cycle pc is e
-major : 3
-minor : 1
-
-reg_d : 2
-reg_s : 0
-
-is_return is 0
-
-the instruction size is 2
-
-the reg_z is set to 0
-
-first argument is 0
-
-is_load is 1, is_store is 0
-
-is_imm is 0
-
-reg_dz is 2
-
-reg_wr_enable is 1
-
-reg_out_a : 0
-reg_out_b : 3
-
-use_s is 1, use_d_or_z is 0
-
-compute_result is 3
-
-pc_inc = 16
-
-pc_next = 16
-
-mem_out = 4
-
-reg_d after write is 2
-
-if 0 = 1 then sim write 0 to location 3
-
-start of new cycle pc is 10
-major : 0
-minor : 0
-
-reg_d : 0
-reg_s : 15
-
-is_return is 1
-
-the instruction size is 2
-
-the reg_z is set to 0
-
-first argument is 0
-
-is_load is 0, is_store is 0
-
-is_imm is 0
-
-reg_dz is 0
-
-reg_wr_enable is 0
-
-reg_out_a : 3
-reg_out_b : 0
-
-use_s is 0, use_d_or_z is 0
-
-compute_result is 0
-
-pc_inc = 18
-
-pc_next = 0
-
-mem_out = 0
-
-reg_d after write is 0
-
-if 0 = 1 then sim write 3 to location 0
-
-Done
->>> Testing test_programs/test_reg_movq.s..
-start of new cycle pc is 0
-major : 6
-minor : 4
-
-reg_d : 10
-reg_s : 0
-
-is_return is 0
-
-the instruction size is 6
-
-the reg_z is set to 0
-
-first argument is 4
-
-is_load is 0, is_store is 0
-
-is_imm is 1
-
-reg_dz is 10
-
-reg_wr_enable is 1
-
-reg_out_a : 0
-reg_out_b : 0
-
-use_s is 0, use_d_or_z is 0
-
-compute_result is 4
-
-pc_inc = 6
-
-pc_next = 6
-
-mem_out = 0
-
-reg_d after write is 10
-
-if 0 = 1 then sim write 0 to location 4
-
-start of new cycle pc is 6
-major : 6
-minor : 4
-
-reg_d : 8
-reg_s : 0
-
-is_return is 0
-
-the instruction size is 6
-
-the reg_z is set to 0
-
-first argument is 2
-
-is_load is 0, is_store is 0
-
-is_imm is 1
-
-reg_dz is 8
-
-reg_wr_enable is 1
-
-reg_out_a : 0
-reg_out_b : 0
-
-use_s is 0, use_d_or_z is 0
-
-compute_result is 2
-
-pc_inc = 12
-
-pc_next = 12
-
-mem_out = 0
-
-reg_d after write is 8
-
-if 0 = 1 then sim write 0 to location 2
-
-start of new cycle pc is c
-major : 2
-minor : 1
-
-reg_d : 10
-reg_s : 8
-
-is_return is 0
-
-the instruction size is 2
-
-the reg_z is set to 0
-
-first argument is 0
-
-is_load is 0, is_store is 0
-
-is_imm is 0
-
-reg_dz is 10
-
-reg_wr_enable is 1
-
-reg_out_a : 4
-reg_out_b : 2
-
-use_s is 1, use_d_or_z is 0
-
-compute_result is 2
-
-pc_inc = 14
-
-pc_next = 14
-
-mem_out = 0
-
-reg_d after write is 10
-
-if 0 = 1 then sim write 4 to location 2
-
-start of new cycle pc is e
-major : 0
-minor : 0
-
-reg_d : 0
-reg_s : 0
-
-is_return is 1
-
-the instruction size is 2
-
-the reg_z is set to 0
-
-first argument is 0
-
-is_load is 0, is_store is 0
-
-is_imm is 0
-
-reg_dz is 0
-
-reg_wr_enable is 0
-
-reg_out_a : 0
-reg_out_b : 0
-
-use_s is 0, use_d_or_z is 0
-
-compute_result is 0
-
-pc_inc = 16
-
-pc_next = 0
-
-mem_out = 0
-
-reg_d after write is 0
-
-if 0 = 1 then sim write 0 to location 0
-
-Done
->>> Testing test_programs/test_ret.s..
-start of new cycle pc is 0
-major : 0
-minor : 0
-
-reg_d : 0
-reg_s : 15
-
-is_return is 1
-
-the instruction size is 2
-
-the reg_z is set to 0
-
-first argument is 0
-
-is_load is 0, is_store is 0
-
-is_imm is 0
-
-reg_dz is 0
-
-reg_wr_enable is 0
-
-reg_out_a : 0
-reg_out_b : 0
-
-use_s is 0, use_d_or_z is 0
-
-compute_result is 0
-
-pc_inc = 2
-
-pc_next = 0
-
-mem_out = 0
-
-reg_d after write is 0
-
-if 0 = 1 then sim write 0 to location 0
-
-Done
+>>> Testing test_programs/test_mul.s..

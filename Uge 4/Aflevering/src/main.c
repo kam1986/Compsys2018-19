@@ -189,10 +189,10 @@ int main(int argc, char* argv[]) {
         // second pp .. 32 .. pp argument not used yet
         /* val arg2 = 
             use_if(is_size10.val == 10,
-                add(put_bits(24, 8, inst_bytes[6]),
-                    add(put_bits(16, 8, inst_bytes[7]),
-                        add(put_bits(8,8,inst_bytes[8]),
-                            put_bits(0,8,inst_bytes[9])
+                add(put_bits(24, 8, inst_bytes[9]),
+                    add(put_bits(16, 8, inst_bytes[8]),
+                        add(put_bits(8,8,inst_bytes[7]),
+                            put_bits(0,8,inst_bytes[6])
                         )
                     )
                 )

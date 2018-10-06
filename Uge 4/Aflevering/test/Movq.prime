@@ -1,0 +1,12 @@
+
+
+movq:
+    movq $2, %rax
+    movq %3, %rbx
+    movq %rax, %r8
+    movq 1(%rax), %rbx
+    movq %r9, 1(%rax)
+    movq (%rbx), %r10
+    movq %r10, %rax
+    ret %rax
+
