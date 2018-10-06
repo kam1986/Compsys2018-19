@@ -122,6 +122,20 @@ int main(int argc, char* argv[]) {
         bool is_leaq6           = is(LEAQ6, major_op);
         bool is_leaq7           = is(LEAQ7, major_op);
 
+
+         //Booleans for call and jump
+        bool is_jump = is(JMP, minor_op);
+        bool is_call = is(CALL, minor_op);
+
+        // IMM_Cbranch boolean flags 
+        bool is_imm_cbranch = is(IMM_CBRANCH, major_op);      // cb<c> $i,d,p   
+        bool is_imm_cbe = is(RETURN, minor_op) && is_imm_cbranch;
+        bool is_imm_cbne = is(REG_ARITHMETIC, minor_op) && is_imm_cbranch;
+        bool is_imm_cbl  = is(CFLOW, minor_op) && is_imm_cbranch;
+        bool is_imm_cble = is(IMM_ARITHMETIC, minor_op) && is_imm_cbranch;
+        bool is_imm_cbg  = is(IMM_MOVQ, minor_op) && is_imm_cbranch;
+        bool is_imm_cbge = is(IMM_MOVQ_MEM, minor_op) && is_imm_cbranch;
+
         val is_size2  =
             use_if(is_reg_arithmetic 
                 || is_reg_movq 
@@ -141,17 +155,30 @@ int main(int argc, char* argv[]) {
 
         val is_size7  = use_if(is_leaq7, SIZE7);
 
-        val is_size10 = use_if(false, SIZE10);// not yet used to imm branching
+        val is_size10 = use_if(is_imm_cbranch, SIZE10); //imm_branching 
 
+        val is_jumping = 
+        use_if(is_jump, SIZE6);
+
+        val is_calling =
+        use_if(is_call, SIZE6);
+
+           // added 
+           //is jumping or is calling
         val ins_size =
             or(is_size2,
                 or(is_size3,
+                or(is_jumping,
+                or(is_calling,
                     or(is_size6,
                         or(is_size7, is_size10)
                     )
                 )
+                )
+                )
+            )
             );
-
+            
         printf("the instruction size is %ld\n\n", ins_size.val);
 
         // extra values that might (not) be needed
