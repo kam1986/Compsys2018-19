@@ -1,13 +1,5 @@
 #include "x86prime_lib.h"
 
-/*
-void swap (long array[], long i, long j) {
-  long tmp = array[i];
-  array[i] = array[j];
-  array[j] = tmp; 
-}
-*/
-
 void dual_pivot_quick_sort(long array[], long lo, long hi) {
   long left = lo;
   long right = hi;
