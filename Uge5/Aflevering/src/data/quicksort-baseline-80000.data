@@ -1,0 +1,7 @@
+
+Branch predictions:  2549098   miss   712679    missrate: 0.279581
+Return predictions:   160000   miss     3444    missrate: 0.021525
+L2-Cache reads:   163520   writes:    41442   miss:   117325   missrate: 0.572423
+I-Cache reads:  13509598   writes:        0   miss:       17   missrate: 0.000001
+D-Cache reads:   2485879   writes:  1326433   miss:   204945   missrate: 0.053759
+Execution finished at cycle 21545581

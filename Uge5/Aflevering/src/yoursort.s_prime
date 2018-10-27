@@ -1,0 +1,183 @@
+dual_pivot_quick_sort:
+.LFB8:
+    subq $8, %rsp
+    movq %r11, (%rsp)
+    cbg %rdx,%rsi,.L15
+    movq (%rsp), %r11
+    addq $8, %rsp
+    ret %r11
+.L15:
+    subq $48, %rsp
+    movq %r15, 40(%rsp)
+    movq %r14, 32(%rsp)
+    movq %r13, 24(%rsp)
+    movq %r12, 16(%rsp)
+    movq %rbp, 8(%rsp)
+    movq %rbx, (%rsp)
+    subq $8, %rsp
+    leaq (%rdi, %rsi, 8), %r15
+    movq (%r15), %rax
+    leaq (%rdi, %rdx, 8), %r14
+    movq (%r14), %rcx
+    cbge %rcx,%rax,.L3
+    movq %rcx, (%r15)
+    movq %rax, (%r14)
+.L3:
+    movq (%r15), %r12
+    movq (%r14), %r11
+    leaq 1(%rsi), %rbp
+    leaq -1(%rdx), %rbx
+    movq %rbp, %rax
+    jmp .L4
+.L5:
+    cbl %r11,%rcx,.L7
+.L6:
+    addq $1, %rax
+.L4:
+    cbg %rax,%rbx,.L16
+    leaq (%rdi, %rax, 8), %r8
+    movq (%r8), %rcx
+    cble %r12,%rcx,.L5
+    leaq (%rdi, %rbp, 8), %r9
+    movq (%r9), %r10
+    movq %r10, (%r8)
+    movq %rcx, (%r9)
+    addq $1, %rbp
+    jmp .L6
+.L9:
+    subq $1, %rbx
+.L7:
+    leaq (%rdi, %rbx, 8), %r9
+    movq (%r9), %r10
+    cbge %r11,%r10,.L8
+    cbl %rax,%rbx,.L9
+.L8:
+    movq %r10, (%r8)
+    movq %rcx, (%r9)
+    subq $1, %rbx
+    movq (%r8), %rcx
+    cble %r12,%rcx,.L6
+    leaq (%rdi, %rbp, 8), %r9
+    movq (%r9), %r10
+    movq %r10, (%r8)
+    movq %rcx, (%r9)
+    addq $1, %rbp
+    jmp .L6
+.L16:
+    movq %rdx, %r12
+    movq %rdi, %r13
+    movq (%r15), %rdx
+    leaq -8(%rdi, %rbp, 8), %rax
+    movq (%rax), %rcx
+    movq %rcx, (%r15)
+    movq %rdx, (%rax)
+    movq (%r14), %rdx
+    leaq 8(%rdi, %rbx, 8), %rax
+    movq (%rax), %rcx
+    movq %rcx, (%r14)
+    movq %rdx, (%rax)
+    leaq -2(%rbp), %rdx
+    call dual_pivot_quick_sort,%r11
+    movq %rbx, %rdx
+    movq %rbp, %rsi
+    movq %r13, %rdi
+    call dual_pivot_quick_sort,%r11
+    leaq 2(%rbx), %rsi
+    movq %r12, %rdx
+    movq %r13, %rdi
+    call dual_pivot_quick_sort,%r11
+    addq $8, %rsp
+    movq (%rsp), %rbx
+    movq 8(%rsp), %rbp
+    movq 16(%rsp), %r12
+    movq 24(%rsp), %r13
+    movq 32(%rsp), %r14
+    movq 40(%rsp), %r15
+    movq 48(%rsp), %r11
+    addq $56, %rsp
+    ret %r11
+run:
+.LFB9:
+    subq $32, %rsp
+    movq %r11, 24(%rsp)
+    movq %r12, 16(%rsp)
+    movq %rbp, 8(%rsp)
+    movq %rbx, (%rsp)
+    in (0),%rcx
+    movq %rcx, %r12
+    andq $1, %r12d
+    andq $2, %ecx
+    in (0),%rdx
+    movq %rdx, %rbx
+    leaq 0(, %rdx, 8), %r8
+    leaq allocator_base, %rax
+    addq %r8, %rax
+    leaq cur_allocator, %r11
+    movq %rax, (%r11)
+    movq $0, %eax
+    jmp .L18
+.L19:
+    leaq allocator_base, %rsi
+    leaq (%rsi, %rax, 8), %rsi
+    in (1),%rdi
+    movq %rdi, (%rsi)
+    addq $1, %rax
+.L18:
+    cbg %rbx,%rax,.L19
+    cbe $0,%rcx,.L20
+    leaq cur_allocator, %r11
+    movq (%r11), %rbp
+    addq %rbp, %r8
+    leaq cur_allocator, %r11
+    movq %r8, (%r11)
+    movq $0, %eax
+    jmp .L21
+.L22:
+    leaq 0(%rbp, %rax, 8), %rcx
+    in (0),%rsi
+    movq %rsi, (%rcx)
+    addq $1, %rax
+.L21:
+    cbl %rax,%rbx,.L22
+.L23:
+    subq $1, %rdx
+    movq $0, %esi
+    movq %rbp, %rdi
+    call dual_pivot_quick_sort,%r11
+    cbe $0,%r12,.L17
+    movq $0, %eax
+    jmp .L26
+.L20:
+    leaq cur_allocator, %r11
+    movq (%r11), %rbp
+    addq %rbp, %r8
+    leaq cur_allocator, %r11
+    movq %r8, (%r11)
+    jmp .L24
+.L25:
+    leaq 0(%rbp, %rcx, 8), %rax
+    in (1),%rsi
+    movq %rsi, (%rax)
+    addq $1, %rcx
+.L24:
+    cbl %rcx,%rbx,.L25
+    jmp .L23
+.L28:
+    leaq 0(%rbp, %rax, 8), %r11
+    movq (%r11), %rdx
+    out %rdx,(0)
+    addq $1, %rax
+.L26:
+    cbl %rax,%rbx,.L28
+.L17:
+    movq %rbp, %rax
+    movq (%rsp), %rbx
+    movq 8(%rsp), %rbp
+    movq 16(%rsp), %r12
+    movq 24(%rsp), %r11
+    addq $32, %rsp
+    ret %r11
+.LFE8:
+.LFE9:
+    .comm allocator_base,8,8
+    .comm cur_allocator,8,8
