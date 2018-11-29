@@ -9,11 +9,19 @@ struct job_queue {
 
   int start; //the first element in buffer
 
+  int end; // last element in the buffer
+  
+  void **buffer; //buffer
 
-  pthread_cond_t stop; //threading stop if full
-  pthread_cond_t go; //otherwise go
+  int placeholder;
+
+  pthread_cond_t open; //otherwise room in buffer
+  pthread_cond_t closed; // threading stop if  buffer is full
 
   pthread_mutex_t mutex; // used for concurrent threading.
+
+// taken from advanced concurrency lecture
+  volatile int die;
 };
 
 // Initialise a job queue with the given capacity.  The queue starts out
