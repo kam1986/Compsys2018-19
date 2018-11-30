@@ -45,18 +45,26 @@ int fauxgrep_file(char const *needle, char const *path) {
   return 0;
 }
 
-// TODO:
-// Worker thingy
+struct argstruct {
+  //argstruct->job_queue2 = jq;
+  struct job_queue ajq;
+  char* needle;
+};
 
-// Each thread will run this function. 
+// TODO:
+// Creating worker threads
+
+// Each thread will run this function.
 // The thread argument is a pointer to a job queue.
 void* worker(void *arg) {
-  struct job_queue *jq = arg;
+  struct argstruct *as = arg;
+  struct job_queue *jq = &as->ajq;
+  char* const needle = as->needle;
+  char *line;
 
   while (1) {
-    char *line;
     if (job_queue_pop(jq, (void**)&line) == 0) {
-      fib_line(line);
+      fauxgrep_file(needle, line);
       free(line);
     } else {
       // If job_queue_pop() returned non-zero, that means the queue is
@@ -69,6 +77,23 @@ void* worker(void *arg) {
   return NULL;
 }
 
+/*
+// TODO:
+// Creating the worker threads
+void* worker(void* arg) {
+  struct job_queue *jq = arg;
+  char* name;
+
+  // For every thread, pop once.
+  // The threads pops the stack until it is empty.
+  while(1) {
+    if (job_queue_pop(jq, (void**)&name) == 0) {
+      fhistogram(name);
+    } else { break; }
+  }
+  return NULL;
+}
+*/
 
 int main(int argc, char * const *argv) {
   if (argc < 2) {
@@ -78,7 +103,7 @@ int main(int argc, char * const *argv) {
 
   int num_threads = 1;
   char const *needle = argv[1];
-  char * const *paths = &argv[2];
+  char* const *paths = &argv[2];
 
 
   if (argc > 3 && strcmp(argv[1], "-n") == 0) {
@@ -104,20 +129,20 @@ int main(int argc, char * const *argv) {
 
   // Initializing the job queue
   struct job_queue jq;
-  job_queue_init(&jq, 64); 
+  job_queue_init(&jq, 64);
+
+  struct argstruct as;
+  as.ajq = jq;
+  as.needle = needle;
 
   // Initializing som worker threads
   // Make space for that many threads
   pthread_t *threads = malloc(num_threads * sizeof(pthread_t));
 
-  // int worker;
-  // job_queue -> worker = element_count % capacity;
-
-  // TODO: &worker thingy
-
+  // TODO: Worker
   // Then we launch the worker threads
   for (int i = 0; i < num_threads; i++) {
-    if (pthread_create(&threads[i], NULL, , &jq) != 0){
+    if (pthread_create(&threads[i], NULL, &worker, &as) != 0){
       err(1, "pthread_create() failed");
     }
   }
@@ -142,7 +167,7 @@ int main(int argc, char * const *argv) {
       break;
     case FTS_F:
       // TODO:
-      job_queue_push(&jq, (needle, strdup(p->fts_path))); // Processing the file p->fts_path
+      job_queue_push(&jq, (void*)strdup(p->fts_path)); // Processing the file p->fts_path
       break;
     default:
       break;

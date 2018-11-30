@@ -45,6 +45,7 @@ int fhistogram(char const *path) {
   while (fread(&c, sizeof(c), 1, f) == 1) {
     i++;
     update_histogram(local_histogram, c);
+    // Printing every 100,000 bytes
     if ((i % 100000) == 0) {
       // Syncing the global variable.
       // If the mutex is currently unlocked, it becomes locked and owned by the calling thread, 
@@ -68,7 +69,21 @@ int fhistogram(char const *path) {
 }
 
 // TODO:
-// Worker thingy
+// Creating the worker threads
+void* worker(void* arg) {
+  struct job_queue *jq = arg;
+  char* name;
+
+  // For every thread, pop once.
+  // The threads pops the stack until it is empty.
+  while(1) {
+    if (job_queue_pop(jq, (void**)&name) == 0) {
+      fhistogram(name);
+    } else { break; }
+  }
+  return NULL;
+}
+
 
 int main(int argc, char * const *argv) {
   if (argc < 2) {
@@ -104,11 +119,11 @@ int main(int argc, char * const *argv) {
   // Initializing som worker threads
   pthread_t *threads = malloc(num_threads * sizeof(pthread_t));
 
-  // TODO: &worker thingy
+  // TODO: &worker_thread thingy
 
   // Then we launch the worker threads
   for (int i = 0; i < num_threads; i++) {
-    if (pthread_create(&threads[i], NULL, , &jq) != 0){
+    if (pthread_create(&threads[i], NULL, &worker, &jq) != 0){
       err(1, "pthread_create() failed");
     }
   }
@@ -133,7 +148,7 @@ int main(int argc, char * const *argv) {
       break;
     case FTS_F:
       // TODO:
-      job_queue_push(&jq, strdup(p->fts_path)); // Processing the file p->fts_path
+      job_queue_push(&jq, (void*)strdup(p->fts_path)); // Processing the file p->fts_path
       break;
     default:
       break;
