@@ -39,15 +39,21 @@ int job_queue_destroy(struct job_queue *job_queue) {
 
 int job_queue_push(struct job_queue *job_queue, void *data) {
   pthread_mutex_lock(&job_queue->mutex);
+
   
     int placeholder = (job_queue ->end + job_queue ->element_count )%(job_queue ->capacity);
     job_queue->buffer[placeholder] = data;
     job_queue->element_count +=1;
+
+      while(&job_queue->buffer, data == &job_queue->capacity){
+        pthread_cond_wait(&job_queue->closed, &job_queue->mutex);
+      }
     
     pthread_cond_signal(&job_queue->closed);
     pthread_mutex_unlock(&job_queue->mutex);
 
     return EXIT_SUCCESS;
+
 
   }
 
