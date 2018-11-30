@@ -45,7 +45,7 @@ int job_queue_push(struct job_queue *job_queue, void *data) {
     job_queue->buffer[placeholder] = data;
     job_queue->element_count +=1;
 
-      while(&job_queue->buffer, data == &job_queue->capacity){
+      while(&job_queue->element_count == &job_queue->capacity){
         pthread_cond_wait(&job_queue->closed, &job_queue->mutex);
       }
     
