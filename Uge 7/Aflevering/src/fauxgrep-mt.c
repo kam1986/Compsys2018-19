@@ -46,9 +46,8 @@ int fauxgrep_file(char const *needle, char const *path) {
 }
 
 struct argstruct {
-  //argstruct->job_queue2 = jq;
-  struct job_queue ajq;
-  char* needle;
+  struct job_queue *ajq;
+  const char* needle;
 };
 
 // TODO:
@@ -58,14 +57,14 @@ struct argstruct {
 // The thread argument is a pointer to a job queue.
 void* worker(void *arg) {
   struct argstruct *as = arg;
-  struct job_queue *jq = &as->ajq;
-  char* const needle = as->needle;
-  char *line;
+  struct job_queue *jq = as->ajq;
+  char const *needle = as->needle;
+  char* path;
 
   while (1) {
-    if (job_queue_pop(jq, (void**)&line) == 0) {
-      fauxgrep_file(needle, line);
-      free(line);
+    if (job_queue_pop(jq, (void**)&path) == 0) {
+      fauxgrep_file(needle, path);
+      free(path);
     } else {
       // If job_queue_pop() returned non-zero, that means the queue is
       // being killed (or some other error occured).  In any case,
@@ -131,15 +130,14 @@ int main(int argc, char * const *argv) {
   struct job_queue jq;
   job_queue_init(&jq, 64);
 
-  struct argstruct as;
-  as.ajq = jq;
-  as.needle = needle;
+  struct argstruct as = { &jq, needle };
 
   // Initializing som worker threads
   // Make space for that many threads
   pthread_t *threads = malloc(num_threads * sizeof(pthread_t));
 
-  // TODO: Worker
+  // TODO: &worker thingy
+
   // Then we launch the worker threads
   for (int i = 0; i < num_threads; i++) {
     if (pthread_create(&threads[i], NULL, &worker, &as) != 0){
