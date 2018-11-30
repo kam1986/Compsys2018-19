@@ -10,9 +10,12 @@
 int job_queue_init(struct job_queue *job_queue, int capacity) {
   // init internal queue.
   queue_init(job_queue -> queue, capacity);
-  // init internal mutex
+  
+  // init internal mutexes 
   pthread_mutex_init(&job_queue->mutex_pop, NULL);
   pthread_mutex_init(&job_queue->mutex_push, NULL);
+
+  // init conditional variables
   pthread_cond_init(&job_queue->c_pop, NULL);
   pthread_cond_init(&job_queue->c_push, NULL);
 
@@ -36,21 +39,32 @@ int job_queue_destroy(struct job_queue *job_queue) {
     // will first wake when job_queue_push calls c_push
     pthread_cond_wait(&job_queue -> c_push, &job_queue -> mutex_pop);
   }
+  
+  
   // destroying the inner stuff
   queue_destroy(job_queue -> queue);
-  
+
+  // asserting freeing queue
+  assert(job_queue -> queue == NULL);
+
   // destroying mutexes and c_variables
   pthread_cond_destroy(&(job_queue -> c_push));
   pthread_cond_destroy(&(job_queue -> c_pop));
+  
+  // asserting destruction of conditional variables
+  assert((job_queue -> c_pop & job_queue -> c_push) == NULL);
   
   // unlocking mutexes
   pthread_mutex_unlock(&(job_queue -> mutex_push));
   pthread_mutex_unlock(&(job_queue -> mutex_pop));
 
+
   // destroy mutexes must be done after unlocking
   pthread_mutex_destroy(&(job_queue -> mutex_push));
   pthread_mutex_destroy(&(job_queue -> mutex_pop)); 
   
+  assert((job_queue -> mutex_pop & job_queue -> mutex_push) == NULL);
+
   // freeing job_queue
   free(job_queue);
 
