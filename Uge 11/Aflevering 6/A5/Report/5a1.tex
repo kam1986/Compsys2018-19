@@ -1,0 +1,39 @@
+
+\section{Job Queue}
+\subsection{The Queue}
+When we designed the job queue, we decided to implement the queue and the multi-threading part as separate parts.
+\\[10pt]
+The actual queue are implemented in queue.c and queue.h where we use a hidden typedef struct queue.
+this struct has then a index to the head and end of the queue, a mark and the buffer.
+\\[10pt]
+The queue is made so that it at any point in time, can handle both a push and a pop at the same time, since those two functions affects different part of the queues data structure. The push function only affect the \textit{end} index of the queue and the entry to the queue at \textit{end}. The pop function only affect the \textit{head} index and the entry at \textit{head} in the queue. the critical points of interaction with the queue is when we are, at the two cases where the queue has only one element in it or if the queue with capacity \textit{n}, has \textit{n-1} elements in it. Those are critical because the queue is close to transition to either an empty queue or a queue which is full. We have added a \textit{mark} value, and that with the count of the element combined is enough to ensure safe use when multi-threading we have the following cases.
+\\[10pt]
+First case.
+    if we only pops we are fine and end up with a count of zero.\\
+	if we only push we are fine and end up with a count of two\\
+	if we both push and pop, both head and end get incremented and we end up with a count of one\\
+\\[10pt]
+since the queue at any given time only can push one element and only pop one element at the time we would be fine.
+\\[10pt]
+Second case.
+	if we only pops we are fine and end up with a count of n-2.\\
+	if we only push we are fine and end up with a count of n\\
+	if we both push and pop, both head and end get incremented and we end up with a count of n-1\\
+\\[10pt]
+again we have that nothing ends badly and the queue stays stable.
+to explain a little deeper we have the following table which show the four cases of states between count and mark.
+
+\begin{center}
+	\begin{tabular}{c|c|c|}
+	 count/Mark 	& 		0	& 	1		\\\hline\\
+	 	0		& 	empty  	&  	stable	\\\hline
+	    size  	&   stable 	&	full		\\\hline 	
+	\end{tabular}
+\end{center}
+if we look at the code for \textit{queue.c} we see that the push function check that we are at a none critical point namely inside the two stable areas. The pop function does the same as we can see in the code at line 81 \\
+%TODO input line 52 and 81 from queue.c
+
+Another advantages of splitting the job_queue into to parts namely the queue interface and the multi-threading interface of the queue, is that we can test the queue and its' functions for error separately and then minimize the testing since we then safe can assume that when we test the multi-threading part that the queue interface works and only test for errors that concerns the multi-threading part.
+\\[10pt]
+\subsection{The multi-threading implementation}
+
