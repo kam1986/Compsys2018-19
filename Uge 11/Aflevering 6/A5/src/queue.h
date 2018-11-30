@@ -30,4 +30,5 @@ int queue_push(queue *queue, void *data);
 int queue_pop(queue *queue, void **data);
 
 
-int queue_count(queue *queue);  
+int queue_count(queue *queue);
+

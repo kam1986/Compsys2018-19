@@ -7,9 +7,11 @@
 struct job_queue {
   queue *queue;
   
-  pthread_mutex mutex;
+  int size;
+
+  pthread_mutex_t mutex_push, mutex_pop;
   // conditional variables for both
-  pthread_cond_t c_val c_empty;
+  pthread_cond_t c_pop, c_push;
 };
 
 // Initialise a job queue with the given capacity.  The queue starts out
