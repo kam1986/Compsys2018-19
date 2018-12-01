@@ -30,6 +30,7 @@ int global_histogram[8] = { 0 };
 int fhistogram(char const *path) {
   FILE *f = fopen(path, "r");
 
+  // Local histogram, represented as an array of 8 ints
   int local_histogram[8] = { 0 };
 
   if (f == NULL) {
@@ -51,9 +52,11 @@ int fhistogram(char const *path) {
       // If the mutex is currently unlocked, it becomes locked and owned by the calling thread, 
       // I.e. one thread, as a mutex can never be owned by two different threads simultaneously.
       pthread_mutex_lock(&stdout_mutex);
+      
+      // Adding to the global running histogram
       merge_histogram(local_histogram, global_histogram);
       print_histogram(global_histogram);
-      pthread_mutex_unlock(&stdout_mutex); // Unlocks the mutex
+      pthread_mutex_unlock(&stdout_mutex); // Unlocks the stdout_mutex
     }
   }
 
@@ -63,12 +66,11 @@ int fhistogram(char const *path) {
   pthread_mutex_lock(&stdout_mutex);
   merge_histogram(local_histogram, global_histogram);
   print_histogram(global_histogram);
-  pthread_mutex_unlock(&stdout_mutex);
+  pthread_mutex_unlock(&stdout_mutex); // Unlocks the stdout_mutex
 
   return 0;
 }
 
-// TODO:
 // Creating the worker threads
 void* worker(void* arg) {
   struct job_queue *jq = arg;
@@ -116,10 +118,8 @@ int main(int argc, char * const *argv) {
   struct job_queue jq;
   job_queue_init(&jq, 64); 
 
-  // Initializing som worker threads
+  // Initializing some worker threads
   pthread_t *threads = malloc(num_threads * sizeof(pthread_t));
-
-  // TODO: &worker_thread thingy
 
   // Then we launch the worker threads
   for (int i = 0; i < num_threads; i++) {
@@ -147,7 +147,6 @@ int main(int argc, char * const *argv) {
     case FTS_D:
       break;
     case FTS_F:
-      // TODO:
       job_queue_push(&jq, (void*)strdup(p->fts_path)); // Processing the file p->fts_path
       break;
     default:

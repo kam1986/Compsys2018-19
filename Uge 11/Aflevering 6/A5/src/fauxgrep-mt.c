@@ -54,6 +54,7 @@ struct argstruct {
 // Each thread will run this function.
 // The thread argument is a pointer to a job queue.
 void* worker(void *arg) {
+  // Unpacking struct
   struct argstruct *as = arg;
   struct job_queue *jq = as->ajq;
   char const *needle = as->needle;
@@ -110,10 +111,10 @@ int main(int argc, char * const *argv) {
   struct job_queue jq;
   job_queue_init(&jq, 64);
 
+  // Creating a struct, which contain both the job queue and needle
   struct argstruct as = { &jq, needle };
 
-  // Initializing som worker threads
-  // Make space for that many threads
+  // Initializing some worker threads
   pthread_t *threads = malloc(num_threads * sizeof(pthread_t));
 
   // Then we launch the worker threads

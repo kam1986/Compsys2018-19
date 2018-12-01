@@ -92,7 +92,7 @@ int queue_pop(queue *queue, void **data){
         }
 
         // return the count of element in the queue 
-        return count - 1;
+        return count -1;
     }
     
     // empty
