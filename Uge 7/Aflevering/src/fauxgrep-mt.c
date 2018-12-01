@@ -50,9 +50,7 @@ struct argstruct {
   const char* needle;
 };
 
-// TODO:
 // Creating worker threads
-
 // Each thread will run this function.
 // The thread argument is a pointer to a job queue.
 void* worker(void *arg) {
@@ -75,24 +73,6 @@ void* worker(void *arg) {
 
   return NULL;
 }
-
-/*
-// TODO:
-// Creating the worker threads
-void* worker(void* arg) {
-  struct job_queue *jq = arg;
-  char* name;
-
-  // For every thread, pop once.
-  // The threads pops the stack until it is empty.
-  while(1) {
-    if (job_queue_pop(jq, (void**)&name) == 0) {
-      fhistogram(name);
-    } else { break; }
-  }
-  return NULL;
-}
-*/
 
 int main(int argc, char * const *argv) {
   if (argc < 2) {
@@ -136,8 +116,6 @@ int main(int argc, char * const *argv) {
   // Make space for that many threads
   pthread_t *threads = malloc(num_threads * sizeof(pthread_t));
 
-  // TODO: &worker thingy
-
   // Then we launch the worker threads
   for (int i = 0; i < num_threads; i++) {
     if (pthread_create(&threads[i], NULL, &worker, &as) != 0){
@@ -164,7 +142,6 @@ int main(int argc, char * const *argv) {
     case FTS_D:
       break;
     case FTS_F:
-      // TODO:
       job_queue_push(&jq, (void*)strdup(p->fts_path)); // Processing the file p->fts_path
       break;
     default:
