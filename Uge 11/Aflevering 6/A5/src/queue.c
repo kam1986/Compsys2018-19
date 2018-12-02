@@ -4,7 +4,7 @@
 
 #include "queue.h"
 
-struct queue {
+struct queue{
     /* the queue */
     void **buffer;
     int mark; // for empty/overflow 

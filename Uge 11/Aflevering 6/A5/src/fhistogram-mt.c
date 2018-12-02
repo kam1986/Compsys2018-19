@@ -20,7 +20,18 @@ pthread_mutex_t stdout_mutex = PTHREAD_MUTEX_INITIALIZER;
 // very handy.
 #include <err.h>
 
-#include "histogram.h"
+//#include "histogram.h"
+
+
+
+// Move the cursor down 'n' lines.  Negative 'n' supported.
+static void move_lines(int n) {
+  if (n < 0) {
+    printf("\033[%dA", -n);
+  } else {
+    printf("\033[%dB", n);
+  }
+}
 
 int main(int argc, char * const *argv) {
   if (argc < 2) {

@@ -8,27 +8,31 @@
 
 
 int job_queue_init(struct job_queue *job_queue, int capacity) {
+  
+  int size = capacity;
+  if(size){}
   // init internal queue.
   queue_init(job_queue -> queue, capacity);
   
   // init internal mutexes 
-  pthread_mutex_init(&job_queue->mutex_pop, NULL);
-  pthread_mutex_init(&job_queue->mutex_push, NULL);
+  pthread_mutex_init(&job_queue -> mutex_pop, NULL);
+  pthread_mutex_init(&job_queue -> mutex_push, NULL);
 
   // init conditional variables
-  pthread_cond_init(&job_queue->c_pop, NULL);
-  pthread_cond_init(&job_queue->c_push, NULL);
+  pthread_cond_init(&job_queue -> c_pop, NULL);
+  pthread_cond_init(&job_queue -> c_push, NULL);
 
-  int size = capacity;
 
-  // asserting failing to initiate the queue.
-  assert(&(job_queue -> queue) != NULL); 
   return 1;
 }
 
 
 int job_queue_destroy(struct job_queue *job_queue) {
   
+  if(job_queue == NULL){
+    // nothing really happens
+    return 1;
+  }
   // locking both mutex
   pthread_mutex_lock(&(job_queue -> mutex_push));
   pthread_mutex_lock(&(job_queue -> mutex_pop));
@@ -44,16 +48,11 @@ int job_queue_destroy(struct job_queue *job_queue) {
   // destroying the inner stuff
   queue_destroy(job_queue -> queue);
 
-  // asserting freeing queue
-  assert(job_queue -> queue == NULL);
-
   // destroying mutexes and c_variables
   pthread_cond_destroy(&(job_queue -> c_push));
   pthread_cond_destroy(&(job_queue -> c_pop));
   
-  // asserting destruction of conditional variables
-  assert((job_queue -> c_pop & job_queue -> c_push) == NULL);
-  
+ 
   // unlocking mutexes
   pthread_mutex_unlock(&(job_queue -> mutex_push));
   pthread_mutex_unlock(&(job_queue -> mutex_pop));
@@ -62,9 +61,7 @@ int job_queue_destroy(struct job_queue *job_queue) {
   // destroy mutexes must be done after unlocking
   pthread_mutex_destroy(&(job_queue -> mutex_push));
   pthread_mutex_destroy(&(job_queue -> mutex_pop)); 
-  
-  assert((job_queue -> mutex_pop & job_queue -> mutex_push) == NULL);
-
+ 
   // freeing job_queue
   free(job_queue);
 
@@ -105,6 +102,11 @@ int job_queue_push(struct job_queue *job_queue, void *data){
 
 int job_queue_pop(struct job_queue *job_queue, void **data) {
   
+  if(job_queue == NULL || data == NULL){
+    // bad reference
+    return -1;
+  }
+
   // lock mutex_pop of the job_queue
   pthread_mutex_lock(&(job_queue -> mutex_pop));   
   
