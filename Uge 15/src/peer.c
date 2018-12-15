@@ -50,9 +50,12 @@ int login(char* host, char* port, char* nick, char* password){
             return -1; // eligale fd (file descriptor) 
     }
 }
-/*
-int logout(){
-    
+
+int logout(int clientfd){
+    // send closing message to server.
+    Rio_writen(clientfd, "close\n", 6);
+    close(clientfd);
+    fprintf(stdout, "You are now logged out.\n");
     return 0;
 }
 
@@ -61,8 +64,9 @@ int lookup(char* input){
     return 0;
 }
 
-int exit(){
-    return 0;
+int exit(int client){
+    logout();
+    exit(0);
 }
 
 */
