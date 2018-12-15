@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <string.h>
+
 
 #include "csapp.h"
 #include "peer.h"
@@ -13,7 +15,7 @@
 int login(char* host, char* port, char* nick, char* password){
     
     // creating message to server, and responsebuffer
-    char msg[7+sio_strlen(nick)+sio_strlen(password)], buf[MAXLINE];
+    char msg[7+strlen(nick)+strlen(password)], buf[MAXLINE];
 
     sprintf(msg, "login %s %s", nick, password);
     
@@ -51,8 +53,9 @@ int login(char* host, char* port, char* nick, char* password){
 }
 
 int logout(int clientfd){
+    char* msg = "close\n";
     // send closing message to server.
-    while(Rio_writen(clientfd, "close\n", 6) < 0){}
+    while(rio_writen(clientfd, msg, 6) < 0){}
     
     // close file descriptor
     close(clientfd);
@@ -60,7 +63,7 @@ int logout(int clientfd){
     return 0;
 }
 
-int lookup(int* clientfd, char* input){
+int lookup(int clientfd, char* input){
     
     char buf[MAXLINE];
     int checker;
@@ -69,17 +72,18 @@ int lookup(int* clientfd, char* input){
     Rio_readinitb(&rio, clientfd);
 
     // send request
-    while(Rio_writen(clientfd, input, sio_strlen(input) < 0){}
+    while(rio_writen(clientfd, input, strlen(input)) < 0){}
     
     // read response
-    while((checker = Rio_readlineb(rio, buf, MAXLINE)) >= 0){
+    while((checker = Rio_readlineb(&rio, buf, MAXLINE)) >= 0){
         fprintf(stdout, "%s", buf);
     }
     return 0;
 }
 
-int exit(int client){
-    logout();
+// with capital E to prevent naming conflict
+int Exit(int client){
+    logout(client);
     exit(0);
 }
 
@@ -89,6 +93,9 @@ int main(int argc, char**argv) {
         printf("%s expects %d arguments.\n", (argv[0]+2), ARGNUM);
         return(0);
     }
+    
+
+
 
     return 0;
 
