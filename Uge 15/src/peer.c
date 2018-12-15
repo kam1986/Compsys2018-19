@@ -13,8 +13,9 @@
 
 int login(char* host, char* port, char* nick, char* password){
     
-    // creating message to server
-    char *msg buf[MAXLINE];
+    // creating message to server, and responsebuffer
+    char msg[7+strlen(nick)+strlen(password)], buf[MAXLINE];
+
     sprintf(msg, "login %s %s", nick, password);
     
     // open connection to server
@@ -33,26 +34,23 @@ int login(char* host, char* port, char* nick, char* password){
     }
 
     // sending login request to server
-    Rio_writeb(clientfd, msg, strlen(msg));
+    Rio_writen(clientfd, msg, strlen(msg));
 
     // keeps reading response line undtil it comes
-    while((rsplen = Rio_readlineb(&rio, buff, MAXLINE))<=0){}
+    while((rsplen = Rio_readlineb(&rio, buf, MAXLINE))<=0){}
     
     switch(rsplen){
-        case (strlen("true")):
+        case 4:
             fprintf(stdout, "You are now logged in.\n");
+            // return socket (file descriptor)
             return clientfd;
 
-        case (strlen("false")):
-            fprintf(stderr, "Wrong user and/or password.\n")
-            return -1; // eligale fd (file discriptor) 
+        default:
+            fprintf(stderr, "Wrong user and/or password.\n");
+            return -1; // eligale fd (file descriptor) 
     }
-    
-
-    // return file descriptor for the server (read/write)
-    return clientfd;
 }
-
+/*
 int logout(){
     
     return 0;
@@ -67,13 +65,13 @@ int exit(){
     return 0;
 }
 
-
+*/
 int main(int argc, char**argv) {
     if (argc != ARGNUM + 1) {
         printf("%s expects %d arguments.\n", (argv[0]+2), ARGNUM);
         return(0);
     }
 
-    int checkpoint
+    return 0;
 
 }
