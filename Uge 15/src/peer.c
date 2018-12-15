@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <unistd.h>
 
 #include "csapp.h"
@@ -14,7 +13,7 @@
 int login(char* host, char* port, char* nick, char* password){
     
     // creating message to server, and responsebuffer
-    char msg[7+strlen(nick)+strlen(password)], buf[MAXLINE];
+    char msg[7+sio_strlen(nick)+sio_strlen(password)], buf[MAXLINE];
 
     sprintf(msg, "login %s %s", nick, password);
     
@@ -37,7 +36,7 @@ int login(char* host, char* port, char* nick, char* password){
     Rio_writen(clientfd, msg, strlen(msg));
 
     // keeps reading response line undtil it comes
-    while((rsplen = Rio_readlineb(&rio, buf, MAXLINE))<=0){}
+    while((rsplen = Rio_readlineb(&rio, buf, MAXLINE)) <= 0){}
     
     switch(rsplen){
         case 4:
@@ -53,14 +52,29 @@ int login(char* host, char* port, char* nick, char* password){
 
 int logout(int clientfd){
     // send closing message to server.
-    Rio_writen(clientfd, "close\n", 6);
+    while(Rio_writen(clientfd, "close\n", 6) < 0){}
+    
+    // close file descriptor
     close(clientfd);
     fprintf(stdout, "You are now logged out.\n");
     return 0;
 }
 
-int lookup(char* input){
+int lookup(int* clientfd, char* input){
     
+    char buf[MAXLINE];
+    int checker;
+    // init rio buffer reading
+    rio_t rio;
+    Rio_readinitb(&rio, clientfd);
+
+    // send request
+    while(Rio_writen(clientfd, input, sio_strlen(input) < 0){}
+    
+    // read response
+    while((checker = Rio_readlineb(rio, buf, MAXLINE)) >= 0){
+        fprintf(stdout, "%s", buf);
+    }
     return 0;
 }
 
@@ -69,7 +83,7 @@ int exit(int client){
     exit(0);
 }
 
-*/
+
 int main(int argc, char**argv) {
     if (argc != ARGNUM + 1) {
         printf("%s expects %d arguments.\n", (argv[0]+2), ARGNUM);
