@@ -31,7 +31,7 @@ int login(char* host, char* port, char* nick, char* password){
     // check for connection error
     if(clientfd == -1){
         fprintf(stderr,"Could not find server. Try another host\n");
-        exit(1);
+        return clientfd;
     }
 
     // sending login request to server
@@ -93,7 +93,7 @@ int main(int argc, char**argv) {
         printf("%s expects %d arguments.\n", (argv[0]+2), ARGNUM);
         return(0);
     }
-    
+
 
 
 
