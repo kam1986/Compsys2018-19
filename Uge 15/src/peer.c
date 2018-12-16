@@ -8,25 +8,25 @@
 #include "peer.h"
 
 #define ARGNUM 2 // the peer program takes a IP-adress 
-                 // and a prot for which it shoud listingning to
+                 // and a port for which it shoud listingning to
 
 
 
-int login(char* host, char* port, char* nick, char* password){
+int login(char* client, char* clientport, char* host, char* port, char* nick, char* password){
     
     // creating message to server, and responsebuffer
     char msg[7+strlen(nick)+strlen(password)], buf[MAXLINE];
 
-    sprintf(msg, "/login %s %s", nick, password);
-    
-    // open connection to server
-    // open_clientfd from csapp.h
-    int rsplen, clientfd = open_clientfd(host, port);
+    sprintf(msg, "/login %s %s %s %s\n", nick, password, client, clientport);
     
     // buffer
     rio_t rio;
     // init buffer
     Rio_readinitb(&rio, clientfd);
+    
+    // open connection to server
+    // open_clientfd from csapp.h
+    int rsplen, clientfd = open_clientfd(host, port);
 
     // check for connection error
     if(clientfd == -1){
@@ -37,18 +37,18 @@ int login(char* host, char* port, char* nick, char* password){
     // sending login request to server
     Rio_writen(clientfd, msg, strlen(msg));
 
-    // keeps reading response line undtil it comes
+    // keeps reading for response line undtil it comes
     while((rsplen = Rio_readlineb(&rio, buf, MAXLINE)) <= 0){}
     
     switch(rsplen){
-        case 4:
+        case 4: // should return 'true'
             fprintf(stdout, "You are now logged in.\n");
             // return socket (file descriptor)
             return clientfd;
 
         default:
             fprintf(stderr, "Wrong user and/or password.\n");
-            return -1; // eligale fd (file descriptor) 
+            return -1; // illegal fd (file descriptor) 
     }
 }
 
@@ -79,10 +79,11 @@ int lookup(int clientfd, char* input){
     // send request
     while(rio_writen(clientfd, input, strlen(input)) < 0){}
     
-    // read response
+    // read response OBS might need a redo
     while((checker = Rio_readlineb(&rio, buf, MAXLINE)) >= 0){
-        fprintf(stdout, "%s", buf);
+        fprintf(stdout, "%s\n", buf);
     }
+
     return 0;
 }
 
@@ -93,6 +94,9 @@ int Exit(int client){
 }
 
 
+
+
+// the program 
 int main(int argc, char**argv) {
     if (argc != ARGNUM + 1) {
         printf("%s expects %d arguments.\n", (argv[0]+2), ARGNUM);
@@ -122,8 +126,8 @@ int main(int argc, char**argv) {
             // filtering arguments from args 
             sscanf(args,"%s %s %s %s", nick, password, ip, port);
             
-            // try login to server
-            clientfd = login(ip, port, nick, password);
+            // try login to server (argv[1] = host-IP, argv[2] = host-port)
+            clientfd = login(ip, port, argv[1], argv[2], nick, password);
         }
 
         // logout
