@@ -107,13 +107,14 @@ int main(int argc, char**argv) {
         char buf[1024], command[8], args[500];
         // scanning input
         fscanf(stdin, "%s", buf);
-        // filter input (at most 1 command and 4 arguments)
+        // filter input in command and arguments
         sscanf(buf, "%s %s", command, args);
 
         if(strcmp("/exit", command)){
             // terminates the program.
             Exit(clientfd);
         }
+
         // send login request and set fd
         if(strcmp("/login", command)){
             char nick[100], password[1000], ip[15], port[5];
