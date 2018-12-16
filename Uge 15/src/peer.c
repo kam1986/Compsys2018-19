@@ -17,7 +17,7 @@ int login(char* host, char* port, char* nick, char* password){
     // creating message to server, and responsebuffer
     char msg[7+strlen(nick)+strlen(password)], buf[MAXLINE];
 
-    sprintf(msg, "login %s %s", nick, password);
+    sprintf(msg, "/login %s %s", nick, password);
     
     // open connection to server
     // open_clientfd from csapp.h
@@ -53,14 +53,19 @@ int login(char* host, char* port, char* nick, char* password){
 }
 
 int logout(int clientfd){
-    char* msg = "close\n";
-    // send closing message to server.
-    while(rio_writen(clientfd, msg, 6) < 0){}
-    
-    // close file descriptor
-    close(clientfd);
-    fprintf(stdout, "You are now logged out.\n");
-    return 0;
+    if(clientfd != -1){
+        char* msg = "close\n";
+        // send closing message to server.
+        while(rio_writen(clientfd, msg, 6) < 0){}
+        
+        // close file descriptor
+        close(clientfd);
+        fprintf(stdout, "You are now logged out.\n");
+        return 0;
+    }
+
+    fprintf(stderr, "You are not logged in\n");
+    return -1;
 }
 
 int lookup(int clientfd, char* input){
@@ -94,7 +99,56 @@ int main(int argc, char**argv) {
         return(0);
     }
 
+    int clientfd;
+    
+    // main rutine 
+    while(1){
+        // commandline command and arguments
+        char buf[1024], command[8], args[500];
+        // scanning input
+        fscanf(stdin, "%s", buf);
+        // filter input (at most 1 command and 4 arguments)
+        sscanf(buf, "%s %s", command, args);
 
+        if(strcmp("/exit", command)){
+            // terminates the program.
+            Exit(clientfd);
+        }
+        // send login request and set fd
+        if(strcmp("/login", command)){
+            char nick[100], password[1000], ip[15], port[5];
+            
+            // filtering arguments from args 
+            sscanf(args,"%s %s %s %s", nick, password, ip, port);
+            
+            // try login to server
+            clientfd = login(ip, port, nick, password);
+        }
+
+        // logout
+        if(strcmp("/logout", command)){
+            logout(clientfd);
+        }
+
+        // lookup
+        if(strcmp("/lookup", command)){
+            // if logged in
+            if(clientfd != -1){
+                // if no arguments are given
+                if(strcmp("", args)){
+                    lookup(clientfd, "lookup\n");
+                
+                // if arguments are given
+                } else {
+                    char request[6+strlen(args)];
+                    
+                    // formating protocol
+                    sprintf(request, "lookup %s\n", args);
+                    lookup(clientfd, request); 
+                }
+            }
+        }
+    }
 
 
     return 0;
