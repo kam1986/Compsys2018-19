@@ -29,27 +29,23 @@ int queue_init(queue *queue, int capacity){
 int queue_destroy(queue *queue){
     free(queue -> buffer);
     free(queue);
-    
-    // asserting freeing
-    assert((queue -> buffer) == NULL);
-    assert(queue == NULL);
 
     return 1;
 }
 
 int queue_push(queue *queue, void *data){
     int count = (queue -> end) - (queue -> head);
-    
     // correct count depending on position of the head and end.
     if(count < 0){
         count = (queue -> size) + count;
     } 
 
+    
     /*
         checking for full queue
         e.i. not mark = 1 && count < size 
     */
-    if((queue -> mark) == 0 || count != (queue -> size)){
+    if((queue -> mark) != 1 && count != (queue -> size)){
         // pushing data onto the queue at end*/
         (queue -> buffer)[queue -> end] =  data;
         
@@ -57,10 +53,11 @@ int queue_push(queue *queue, void *data){
         (queue -> end) = ((queue -> end) + 1) % (queue -> size); 
     
         // check for queue
-        if(queue -> head == queue -> end){
+        if(count + 1 == queue -> size){
             queue -> mark = 1; // set full queue mark
-        }
 
+        }
+       
         // return the new count of element in the queue 
         return count + 1;
     } 
@@ -72,13 +69,12 @@ int queue_push(queue *queue, void *data){
 
 int queue_pop(queue *queue, void **data){
     int count = (queue -> end) - (queue -> head);
-    
     // correct count depending on position of the head and end.
     if(count < 0){
         count = (queue -> size) + count;
     } 
-
-    if((queue -> mark) == 1 || count != 0){
+    
+    if((queue -> mark) != 1 && count != 0){
     
         /* put the head at datas location */
         *data = (queue -> buffer)[queue -> head];
@@ -92,7 +88,7 @@ int queue_pop(queue *queue, void **data){
         }
 
         // return the count of element in the queue 
-        return count - 1;
+        return count-1;
     }
     
     // empty
@@ -100,7 +96,7 @@ int queue_pop(queue *queue, void **data){
 }
 
 int queue_count(queue *queue){
-    int count = (queue -> head) - (queue -> end);
+    int count = (queue -> end) - (queue -> head);
     
     // correct count depending on position of the head and end.
     if(count < 0){

@@ -33,7 +33,7 @@ int main(){
 
     /* pop the head */
     assert(job_queue_pop(q, &data) == 2);
-    out1 = *((int*)data);
+    out1 = *((int*) &data);
     if(out1 != 4){
         exit(1);
     }

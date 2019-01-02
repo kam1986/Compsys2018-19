@@ -1,6 +1,5 @@
 CC = gcc
 CFLAGS =-Wall -Wextra -pedantic -std=gnu11
-LD_FLAGS = -lpthread
 
 all : peer name_server
 

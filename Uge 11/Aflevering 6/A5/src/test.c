@@ -7,7 +7,7 @@
 
 int main(){
 
-    queue *q = NULL;
+    struct queue *q;
     
     queue_init(q, 4);
 
@@ -20,6 +20,7 @@ int main(){
 
     
     int out1 = 0;
+
     /* test for pop on empty queue*/
     assert(queue_pop(q, &data) == 0);
     
@@ -45,10 +46,11 @@ int main(){
     
     assert(queue_push(q, (void*) &two) == 4);
         
+
     assert(queue_push(q, (void*) &four) == 4);
-  
-
+    
+    
     queue_destroy(q);
-
+    
     return 0;
 }

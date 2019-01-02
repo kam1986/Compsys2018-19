@@ -111,7 +111,7 @@ int job_queue_pop(struct job_queue *job_queue, void **data) {
   pthread_mutex_lock(&(job_queue -> mutex_pop));   
   
   // try pushing onto the queue, set the thread asleep if overflow (equal 0).
-  while(queue_pop(job_queue -> queue, data) == 0){
+  while(queue_pop(job_queue -> queue, data) == -1){
     
     // set the thread to wait for 
     pthread_cond_wait(&(job_queue -> c_pop), &(job_queue -> mutex_pop));
