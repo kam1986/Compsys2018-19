@@ -2,17 +2,20 @@ CC = gcc
 CFLAGS =-Wall -Wextra -pedantic -std=gnu11
 LD_FLAGS = -lpthread
 
-all : peer name_server
+all : peer name_server peer_help
 
 rebuild : clean all
 
 csapp.o : csapp.c csapp.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
+peer_help: peer_help.c peer_help.h csapp.h
+	$(CC) $(CFLAGS) -c $< -o $@
+
 buffer.o : buffer.c buffer.h csapp.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
-peer : peer.c peer.h csapp.o buffer.o
+peer : peer.c peer.h csapp.o peer_help.o
 	$(CC) $(CFLAGS) $< *.o -o $@ $(LD_FLAGS)
 
 name_server : name_server.c name_server.h csapp.o
