@@ -66,9 +66,9 @@ int send_message(int server, char *nick, char* msg){
     char buf[MAXLINE], peer[MAXLINE], ip[MAXLINE], port[MAXLINE];
 
     // making protocol request
-    sprintf(buf, "LOOKUP: %s\n", nick);
+    sprintf(buf, "LOOKUP: %s", nick);
     
-    // sending request for peer info
+    // sending request for peer infotest
     Send(server, buf);
 
     // get response
@@ -90,7 +90,7 @@ int send_message(int server, char *nick, char* msg){
     }
     
     // build message protocol 
-    sprintf(buf, "MSG: From: %s, Message : %s", nick, msg);
+    sprintf(buf, "MSG: From: %s\nMessage : %s", nick, msg);
     Send(connfd, buf); // send message.
 
     return 0;
@@ -114,8 +114,9 @@ int store_message(int socket, char* folder, char *nick){
 
     // write only, if not exist then create new file
     // and append new data to the end of the file.
-    msgfd = Open(path, O_WRONLY | O_CREAT | O_APPEND, 0);
+    msgfd = Open(path, O_CREAT | O_APPEND | O_WRONLY, 0);
 
+    // read all of the message and write it into the file.
     while(readline(socket, buf) > 0){
         Rio_writen(msgfd, buf, MAXLINE);
     }
@@ -128,19 +129,26 @@ int store_message(int socket, char* folder, char *nick){
 
 // TODO need to handle read for all messages.
 // assume that the message are saved correctly formatted.
-// and only one peer for each folder. 
-int get_messages(char *folder, char *nick){
+// outputfd is the file descriptor for the output. 
+int get_messages(char *folder, char *nick, FILE *outputfd){
     if(folder == NULL){
         fprintf(stderr, "folder missing\n");
         exit(1);
     }
 
+    FILE *out = outputfd;
     int msgfd;
     char path[MAXLINE], buf[MAXLINE], peer[MAXLINE];
 
     // directory
     DIR *dir;
     struct dirent *messages;
+
+    // set to standard output if no other is given.
+    if(out == NULL){
+        out = stdout;
+    }
+
 
     // get all messages
     if(nick != NULL){
@@ -151,25 +159,23 @@ int get_messages(char *folder, char *nick){
         // fetch directory pointer.
         dir = opendir(path);
         if(dir == NULL){
-            fprintf(stdout, "No New messages.\n");
+            fprintf(out, "No New messages.\n");
             return 0;
         }
 
         // read data struct into messages, and set pointer dir to next struct.
         while((messages = readdir(dir)) != NULL){
-            // get peer nick
-            sscanf((messages -> d_name), "%s/%s.msg", buf, peer);
             
             // open file for read only            
             // printing header
-            fprintf(stdout, "Messages from %s\n", nick);
+            fprintf(out, "Messages from %s\n", message -> d_name);
             
             // open file, do not need to check if it exist since
             // we fetch data from directory.
             msgfd = Open(path, O_RDONLY, 0);
             // printing messages. 
             while(readline(msgfd, buf) > 0){
-                fprintf(stdout, "%s", buf);
+                fprintf(out, "%s", buf);
             } 
         
             // remove file from folder e.i. messages
@@ -188,15 +194,15 @@ int get_messages(char *folder, char *nick){
     sprintf(path, "%s/Messages/%s.msg", folder, nick);
     // check for no new messages e.i. no file no messages.
     if((msgfd = Open(path, O_RDONLY, 0)) < 0){
-         fprintf(stdout, "No new messages from %s\n", nick);
+         fprintf(out, "No new messages from %s\n", nick);
          return 0;
     }
     
     // print header
-    fprintf(stdout, "Messages from %s\n", nick);
+    fprintf(out, "Messages from %s\n", nick);
     // read and print messages undtil file is empty or error.
     while(readline(msgfd, buf) > 0){
-        fprintf(stdout, "%s", buf);
+        fprintf(out, "%s", buf);
     }
 
     // remove file from folder e.i. messages
