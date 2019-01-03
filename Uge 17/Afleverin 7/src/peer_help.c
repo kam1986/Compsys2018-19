@@ -1,8 +1,10 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <stdio.h>      // standard input/output library
+#include <stdlib.h>     // standard function library
+#include <string.h>     // string library
+#include <sys/types.h>  // system type library
+#include <dirent.h>     // standard directory library
 
-#include "csapp.h"
+#include "csapp.h"      // helper functions from the book
 
 
 // A6
@@ -57,6 +59,7 @@ int EXIT(){
 
 // A7 part.
 
+// Send msg to nick, msg must be shorter than MAXLINE.
 int send_message(int server, char *nick, char* msg){
     
     int connfd;
@@ -127,26 +130,71 @@ int store_message(int socket, char* folder, char *nick){
 // assume that the message are saved correctly formatted.
 // and only one peer for each folder. 
 int get_messages(char *folder, char *nick){
-    
-    int msgfd;
-    char path[MAXLINE], buf[MAXLINE];
-    sprintf(path, "%s/Message/%s.msg", folder, nick);
+    if(folder == NULL){
+        fprintf(stderr, "folder missing\n");
+        exit(1);
+    }
 
+    int msgfd;
+    char path[MAXLINE], buf[MAXLINE], peer[MAXLINE];
+
+    // directory
+    DIR *dir;
+    struct dirent *messages;
+
+    // get all messages
     if(nick != NULL){
-        // TODO !!!
-        // load directory struct, and iterate over it,
-        // open and read all .msg files and print.
-        // clean directory.
+        
+        // build directory path.
+        sprintf(path, "%s/Messages", folder);
+
+        // fetch directory pointer.
+        dir = opendir(path);
+        if(dir == NULL){
+            fprintf(stdout, "No New messages.\n");
+            return 0;
+        }
+
+        // read data struct into messages, and set pointer dir to next struct.
+        while((messages = readdir(dir)) != NULL){
+            // get peer nick
+            sscanf((messages -> d_name), "%s/%s.msg", buf, peer);
+            
+            // open file for read only            
+            // printing header
+            fprintf(stdout, "Messages from %s\n", nick);
+            
+            // open file, do not need to check if it exist since
+            // we fetch data from directory.
+            msgfd = Open(path, O_RDONLY, 0);
+            // printing messages. 
+            while(readline(msgfd, buf) > 0){
+                fprintf(stdout, "%s", buf);
+            } 
+        
+            // remove file from folder e.i. messages
+            // remove postpond deletion, if the file is active in any other processes.
+            remove(path);
+
+            // closing file descriptor
+            Close(msgfd);
+        }
+        // close directory pointer
+        Closedir(dir);
+        return 0;
     }
     
+
+    sprintf(path, "%s/Messages/%s.msg", folder, nick);
     // check for no new messages e.i. no file no messages.
     if((msgfd = Open(path, O_RDONLY, 0)) < 0){
          fprintf(stdout, "No new messages from %s\n", nick);
          return 0;
     }
-
+    
+    // print header
+    fprintf(stdout, "Messages from %s\n", nick);
     // read and print messages undtil file is empty or error.
-    fprintf(stdout, "Messages from %s\n\n", nick);
     while(readline(msgfd, buf) > 0){
         fprintf(stdout, "%s", buf);
     }
