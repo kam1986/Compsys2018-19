@@ -16,7 +16,7 @@ int Send(int socket, char *buf){
     }
     
     char ibuf[MAXLINE];
-
+    // adding newline 
     sprintf(ibuf, "%s\n", buf); 
     
     // sending content of buf through socket.
@@ -117,7 +117,7 @@ int store_message(int socket, char* folder, char *nick){
     msgfd = Open(path, O_WRONLY | O_CREAT | O_APPEND, 0);
 
     while(readline(socket, buf) > 0){
-        Rio_writen(socket, buf, MAXLINE);
+        Rio_writen(msgfd, buf, MAXLINE);
     }
 
     Close(msgfd);
