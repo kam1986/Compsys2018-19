@@ -18,8 +18,8 @@ int main(int argc, char**argv) {
         return(0);
     }
 
-    int clientfd, mark;
-
+    int clientfd, listenfd, mark;
+    char user[MAXLINE]; // this peers nickname
     char buf_out[MAXLINE];
     char command[MAXLINE], args[MAXLINE]; // placeholders for command and arguments from stdin
     rio_t rio_out;
@@ -41,83 +41,45 @@ int main(int argc, char**argv) {
     // set selecet set
     FD_ZERO(&read_set);
     FD_SET(STDIN_FILENO, &read_set);
+    FD_SET(clientfd, &read_set);
     Signal(SIGCHLD, sigchald_handler); // reap zombies.
 
-
-    mkdir("Log", NULL);
+    // TODO make when login
     mkdir("Messages", NULL);
 
     // waiting for login
     while(1){
-        fgets(buf, MAXLINE, stdin);
+        Fgets(buf, MAXLINE, stdin);
         sscanf(buf, "%s %s", command, args);
-        
         if(strcmp(command, "/login") == 0){
             sscanf(args, "%s %s %s %s", nick, pass, host, port);
-            
-            // check for input error
-            if(strcmp(nick, "") == 0 || strcmp(pass, "") == 0 || strcmp(host, "") == 0 || strcmp(port, "") == 0){
-                fprintf(stderr, "usage: /login nick password host port.\n");
-                continue;
+            // initiate login
+            sprintf(buf, "LOGIN: %s", nick);
+            Send(clientfd, buf);
+
+
+            // test respons from server
+            readline(clientfd, buf); // from peer_help.h
+            if(strcmp(buf, "Nick OK\n") != 0){
+                fprintf(stderr, "Login error\n");
+                continue; // reset to login
             }
-            
-            // TODO - make directories Log and Messages
 
+            sprintf(buf, "PASS: %s", pass);
+            Send(clientfd, PASS);
 
-            listenfd = Open_listenfd(port);
-            FD_SET(listenfd, &read_set);
-            
-            while(1) {
-                ready_set = read_set;
-                select(listenfd+1, &ready_set, NULL, NULL, NULL);
-                
-                if(FD_ISSET(STDIN_FILENO, &ready_set)){
-                    Fgets(buf, MAXLINE, stdin)
-                    // seperate command and arguments
-                    sscanf(buf, "%s %s", command, args);
-                    
-                    // do command.
-                }
-
-                if(FD_ISSET(listenfd, &ready_set)){
-                    peerlen = sizeof(struct sockaddr_storage);
-                    peerfd = Accept(listenfd, (SA *)&peeraddr, &peerlen);
-
-
-                    // make this modular!! e.i. turn it into a function.    
-                    // Make child process to handle incomming messages from server/peers.
-                    if(FORK() == 0){
-                        Close(listenfd); // should not make new childs.
-                        Close(clientfd); // should not send messages to server.
-                        while(1){
-                            // get messages from peers/server
-                            Rio_readlineb()
-                            
-
-
-                            // --------------------
-
-                            // termination connection
-                            if(strcmp(buf,"Close") == 0){
-                              Close(peerfd);
-                              exit(0);
-                            }
-                        }
-                    } 
-
-
-                }
+            // test respons from server
+            readline(clientfd, buf); // from peer_help.h
+            if(strcmp(buf, "PASS OK\n") != 0){
+                fprintf(stderr, "Login error\n");
+                continue; // reset to login
             }
+
+            sprintf(buf, "IP: %s\nPort: %s");
+            Send(clientfd, buf):
             
         }
         
-        // terminate the peer program.
-        if(strcmp(command,exit) == 0){
-            // TODO close all fd's
-            exit(0);
-        }
-
-        fprintf(stderr, "usage: /login nick password ip port.\n");
     }
 
     Close(clientfd);

@@ -160,15 +160,17 @@ int get_messages(char *folder, char *nick, FILE *outputfd){
         dir = opendir(path);
         if(dir == NULL){
             fprintf(out, "No New messages.\n");
+            Closedir(dir);
             return 0;
         }
 
         // read data struct into messages, and set pointer dir to next struct.
         while((messages = readdir(dir)) != NULL){
             
-            // open file for read only            
+            // open file for read only        
             // printing header
-            fprintf(out, "Messages from %s\n", message -> d_name);
+            sscanf(messages -> d_name, "%s.msg", peer);
+            fprintf(out, "Messages from %s\n", peer);
             
             // open file, do not need to check if it exist since
             // we fetch data from directory.
@@ -182,7 +184,7 @@ int get_messages(char *folder, char *nick, FILE *outputfd){
             // remove postpond deletion, if the file is active in any other processes.
             remove(path);
 
-            // closing file descriptor
+            // close file descriptor
             Close(msgfd);
         }
         // close directory pointer
