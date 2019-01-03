@@ -12,7 +12,7 @@
 int Send(int socket, char *buf){
     if(!socket){
         fprintf(stderr, "NULL sucket.\n");
-        exit(1);
+        return -1;
     }
     
     char ibuf[MAXLINE];
@@ -82,15 +82,15 @@ int send_message(int server, char *nick, char* msg){
     }
 
     // filter response
-    sscanf(buf, "%s is online. IP: %s Port: %s", peer, ip, port);
+    sscanf(buf, "%s is online. IP: %s Port: %s\n", peer, ip, port);
 
     if((connfd = Open_clientfd(ip, port)) < 0){
         fprintf(stderr, "connection error\n");
-        return -1;
+        return -2;
     }
     
     // build message protocol 
-    sprintf(buf, "MSG: From: %s\nMessage : %s", nick, msg);
+    sprintf(buf, "MSG: From: %s\nMessage: %s\n", nick, msg);
     Send(connfd, buf); // send message.
 
     return 0;
@@ -163,17 +163,23 @@ int get_messages(char *folder, char *nick, FILE *outputfd){
             Closedir(dir);
             return 0;
         }
+    
 
         // read data struct into messages, and set pointer dir to next struct.
         while((messages = readdir(dir)) != NULL){
-            
+
+            if(!strcmp(messages -> d_name, ".") || !strcmp(messages -> d_name)){
+                continue;
+            }
+
             // open file for read only        
             // printing header
-            sscanf(messages -> d_name, "%s.msg", peer);
+            sscanf(messages -> d_name, "%s.msg", peer);buf
             fprintf(out, "Messages from %s\n", peer);
             
             // open file, do not need to check if it exist since
             // we fetch data from directory.
+            sprintf(path, "%s/Messages/%s.msg", folder, peer);
             msgfd = Open(path, O_RDONLY, 0);
             // printing messages. 
             while(readline(msgfd, buf) > 0){
@@ -214,5 +220,39 @@ int get_messages(char *folder, char *nick, FILE *outputfd){
     // closing file descriptor
     Close(msgfd);
 
+    return 0;
+}
+
+int reap_messages(char* folder){
+    char path[MAXLINE];
+    
+    // build directory path.
+    sprintf(path, "%s/Messages", folder);
+
+    // fetch directory pointer.
+    dir = opendir(path);
+    if(dir == NULL){
+        // nothing to do.
+        Closedir(dir);
+        return 0;
+    }
+
+    // read data struct into messages, and set pointer dir to next struct.
+    while((messages = readdir(dir)) != NULL){
+        
+        if(!strcmp(messages -> d_name, ".") || !strcmp(messages -> d_name)){
+            continue;
+        }
+        // removing file
+        sprintf(path, "%s/Messages/%s", folder, messages -> d_name);
+        remove(path);
+
+        // close file descriptor
+        Close(msgfd);
+    }
+    
+    sprintf(path, "%s/Messages", folder);
+    // removing directory
+    remove(path);
     return 0;
 }
