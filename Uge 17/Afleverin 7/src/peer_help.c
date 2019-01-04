@@ -138,7 +138,7 @@ int get_messages(char *folder, char *nick, FILE *outputfd){
 
     FILE *out = outputfd;
     int msgfd;
-    char path[MAXLINE], buf[MAXLINE], peer[MAXLINE];
+    char path[MAXLINE], buf[MAXLINE], peer[MAXLINE/2];
 
     // directory
     DIR *dir;
@@ -168,13 +168,13 @@ int get_messages(char *folder, char *nick, FILE *outputfd){
         // read data struct into messages, and set pointer dir to next struct.
         while((messages = readdir(dir)) != NULL){
 
-            if(!strcmp(messages -> d_name, ".") || !strcmp(messages -> d_name)){
+            if(strcmp(messages -> d_name, ".") == 0 || strcmp(messages -> d_name, "..") == 0){
                 continue;
             }
 
             // open file for read only        
             // printing header
-            sscanf(messages -> d_name, "%s.msg", peer);buf
+            sscanf(messages -> d_name, "%s.msg", peer);
             fprintf(out, "Messages from %s\n", peer);
             
             // open file, do not need to check if it exist since
@@ -225,7 +225,9 @@ int get_messages(char *folder, char *nick, FILE *outputfd){
 
 int reap_messages(char* folder){
     char path[MAXLINE];
-    
+    DIR *dir;
+    struct dirent *messages;
+
     // build directory path.
     sprintf(path, "%s/Messages", folder);
 
@@ -240,15 +242,13 @@ int reap_messages(char* folder){
     // read data struct into messages, and set pointer dir to next struct.
     while((messages = readdir(dir)) != NULL){
         
-        if(!strcmp(messages -> d_name, ".") || !strcmp(messages -> d_name)){
+        if(strcmp(messages -> d_name, ".") == 0 || strcmp(messages -> d_name, "..") == 0){
             continue;
         }
         // removing file
         sprintf(path, "%s/Messages/%s", folder, messages -> d_name);
         remove(path);
 
-        // close file descriptor
-        Close(msgfd);
     }
     
     sprintf(path, "%s/Messages", folder);

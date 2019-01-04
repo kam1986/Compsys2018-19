@@ -18,11 +18,11 @@ buffer.o : buffer.c buffer.h csapp.h
 peer : peer.c peer.h csapp.o peer_help.o
 	$(CC) $(CFLAGS) $< *.o -o $@ $(LD_FLAGS)
 
-name_server : name_server.c name_server.h csapp.o
+name_server : name_server.c name_server.h csapp.o peer_help.o
 	$(CC) $(CFLAGS) $< *.o -o $@ $(LD_FLAGS)
 
 clean :
-	rm -rf *.o peer name_server
+	rm -rf *.o all
 
 ../src.zip :
 	make clean

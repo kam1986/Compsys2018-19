@@ -35,4 +35,7 @@ int store_message(int socket, char* folder, char *nick);
 // TODO need to handle read for all messages.
 // assume that the message are saved correctly formatted.
 // and only one peer for each folder. 
-int get_messages(char *folder, char *nick);
+int get_messages(char *folder, char *nick, FILE *output);
+
+
+int reap_messages(char* folder);
