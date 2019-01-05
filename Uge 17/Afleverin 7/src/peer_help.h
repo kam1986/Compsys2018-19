@@ -14,13 +14,13 @@ int Send(int socket, char *buf);
 // socket could be any file descriptor.
 int readline(int socket, char *buf);
 
-int login(char *nick, char *pass, char *ip, char* port);
+int login(int socket, char *args, char** user);
 
-int logout();
+int logout(int socket, char *user, pid_t msg_handler);
 
-int look_up(int server, char* nick);
+int look_up(int socket, char *args);
 
-int EXIT();
+int EXIT(int socket, char *user, pid_t msg_handler);
 
 // A7 part.
 

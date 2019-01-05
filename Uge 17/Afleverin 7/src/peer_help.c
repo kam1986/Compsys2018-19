@@ -5,7 +5,7 @@
 #include <dirent.h>     // standard directory library
 
 #include "csapp.h"      // helper functions from the book
-
+#include "peer_help.h"
 
 // A6
 
@@ -18,6 +18,7 @@ int Send(int socket, char *buf){
     char ibuf[MAXLINE];
     // adding newline 
     sprintf(ibuf, "%s\n", buf); 
+    
     
     // sending content of buf through socket.
     return rio_writen(socket, ibuf, strlen(ibuf));
@@ -33,34 +34,125 @@ int readline(int socket, char *buf){
 
     return ret;
 }
-/*
-int login(char *nick, char *pass, char *ip, char* port){
+
+int login(int socket, char *args, char** user){
+    char buf[MAXLINE], 
+         nick[MAXLINE/4], 
+         pass[MAXLINE/4], 
+         ip[MAXLINE/4], 
+         port[MAXLINE/4],
+         path[MAXLINE];
+
+    // testing for number of input
+    if(sscanf(args, "%s %s %s %s\n", nick, pass, ip, port) < 4){ 
+        fprintf(stderr, "Usage: /login nick passwaord ip port\n");
+        return -1;
+    }
+
+    sprintf(buf, "LOGIN: %s", nick);
+    Send(socket, buf);
+
+    // test respons from server
+    readline(socket, buf); // from peer_help.h
+    if(strcmp(buf, "Nick OK\n") != 0){
+        // should block here if either logged in or wrong nick.
+        fprintf(stderr, "Login error\n");
+        return -1; // reset to login
+    }
+
+    sprintf(buf, "PASS: %s", pass);
+    Send(socket, pass);
+
+    // test respons from server
+    readline(socket, buf); // from peer_help.h
+    if(strcmp(buf, "PASS OK\n") != 0){
+        fprintf(stderr, "Login error\n");
+        return -1; // reset to login
+    }
+
+    // login has happened finalize with sending ip and port.
+    sprintf(path, "%s/Messages", nick);
+    mkdir(path, S_IRWXO | S_IRWXU); // make message folder.
+
+    // setting user name to nick.
+    if(user != NULL){
+        *user = nick;
+    }
+
     return 0;
 }
 
-int logout(){
-    // TODO
-    // CLOSE socket.
-    // remove 
+
+int logout(int socket, char *user, pid_t msg_handler){
+    char buf[MAXLINE];
+    int status; 
+
+    sprintf(buf, "LOGOUT: %s", user);
+    
+    while(1){
+        // sending logout request.
+        if(Send(socket, buf) < 0){
+            break; // connection issues
+        }
+        // waiting for the server to respond
+        // OBS server sends request for closing the other process
+        if(readline(socket, buf) <0){
+            break; // connection issues
+        }
+
+        if(strcmp(buf, "LOGGED OUT\n")){
+            break; // trying to log out until it successed
+        }
+    }
+    
+    Close(socket);
+    
+    kill(msg_handler, SIGKILL); // kill message handler process
+    // waiting for child process to terminate.
+    
+    reap_messages(user); // delete messages
+
+    while(waitpid(-1, &status, 0) > 0);
+
+    return status;
+}
+
+
+
+int look_up(int socket, char* args){
+
+    char buf[MAXLINE];
+
+    sprintf(buf, "LOOKUP: %s", args);
+    Send(socket, buf);
+
+    readline(socket, buf);
+    if(strcmp(buf, "Peer not found\n") == 0){
+        fprintf(stderr, "%s", buf);
+        return -1;
+    }
+
+    // print undtil end of file.
+    while(readline(socket, buf) > 0){
+        fprintf(stdin,"%s", buf);
+    }
+
+
     return 0;
 }
 
-int look_up(int server, char* nick){
-    // TODO
-    return 0;
-}
 
-int EXIT(){
-    logout();
+int EXIT(int socket, char *user, pid_t msg_handler){
+    logout(socket, user, msg_handler);
 
     exit(0);
 }
-*/
+
 
 // A7 part.
 
 // Send msg to nick, msg must be shorter than MAXLINE.
-int send_message(int server, char *nick, char* msg){
+int send_message(int socket, char *nick, char* msg){
     
     int connfd;
     char buf[MAXLINE], peer[MAXLINE], ip[MAXLINE], port[MAXLINE];
@@ -69,20 +161,23 @@ int send_message(int server, char *nick, char* msg){
     sprintf(buf, "LOOKUP: %s", nick);
     
     // sending request for peer infotest
-    Send(server, buf);
+    Send(socket, buf);
 
     // get response
-    readline(server, buf);
+    readline(socket, buf);
     
     // check for not online/non user
     if(strcmp(buf, "NOT FOUND\n") == 0){
-        fprintf(stderr, "peer not found\n");
+        fprintf(stderr, "Peer not found\n");
         // OBS - could make the server safe them for the peer.
         return -1;
     }
 
     // filter response
-    sscanf(buf, "%s is online. IP: %s Port: %s\n", peer, ip, port);
+    if(sscanf(buf, "%s is online. IP: %s Port: %s\n", peer, ip, port) < 3){
+        fprintf(stderr, "Protocol format error\n");
+        return -1;
+    }
 
     if((connfd = Open_clientfd(ip, port)) < 0){
         fprintf(stderr, "connection error\n");
@@ -223,13 +318,13 @@ int get_messages(char *folder, char *nick, FILE *outputfd){
     return 0;
 }
 
-int reap_messages(char* folder){
+int reap_messages(char* user){
     char path[MAXLINE];
     DIR *dir;
     struct dirent *messages;
 
     // build directory path.
-    sprintf(path, "%s/Messages", folder);
+    sprintf(path, "%s/Messages", user);
 
     // fetch directory pointer.
     dir = opendir(path);
@@ -246,12 +341,12 @@ int reap_messages(char* folder){
             continue;
         }
         // removing file
-        sprintf(path, "%s/Messages/%s", folder, messages -> d_name);
+        sprintf(path, "%s/Messages/%s", user, messages -> d_name);
         remove(path);
 
     }
     
-    sprintf(path, "%s/Messages", folder);
+    sprintf(path, "%s/Messages", user);
     // removing directory
     remove(path);
     return 0;
