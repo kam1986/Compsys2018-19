@@ -28,14 +28,14 @@ int Send(int socket, char *buf){
 // socket could be any file discriptor types.
 int readline(int socket, char *buf){
     rio_t rio;
-
     Rio_readinitb(&rio, socket);
     int ret = rio_readlineb(&rio, buf, MAXLINE);
+
 
     return ret;
 }
 
-int login(int socket, char *args, char** user){
+int login(int socket, char *args, void *user){
     char buf[MAXLINE], 
          nick[MAXLINE/4], 
          pass[MAXLINE/4], 
@@ -54,7 +54,8 @@ int login(int socket, char *args, char** user){
 
     // test respons from server
     readline(socket, buf); // from peer_help.h
-    if(strcmp(buf, "Nick OK\n") != 0){
+    printf("%s", buf);
+    if(strcmp(buf, "NICK: OK\n") != 0){
         // should block here if either logged in or wrong nick.
         fprintf(stderr, "Login error\n");
         return -1; // reset to login
@@ -65,51 +66,42 @@ int login(int socket, char *args, char** user){
 
     // test respons from server
     readline(socket, buf); // from peer_help.h
-    if(strcmp(buf, "PASS OK\n") != 0){
+    printf("%s", buf);
+    if(strcmp(buf, "PASS: OK\n") != 0){
         fprintf(stderr, "Login error\n");
         return -1; // reset to login
     }
-
+    
     // login has happened finalize with sending ip and port.
     sprintf(path, "%s/Messages", nick);
-    mkdir(path, S_IRWXO | S_IRWXU); // make message folder.
+    mkdir(nick, 0777);
+    mkdir(path, 0777); // make message folder.
+    strcpy(user,nick);
 
-    // setting user name to nick.
-    if(user != NULL){
-        *user = nick;
-    }
 
     return 0;
 }
 
 
-int logout(int socket, char *user, pid_t msg_handler){
+int logout(int socket, void *user, pid_t msg_handler){
     char buf[MAXLINE];
     int status; 
 
-    sprintf(buf, "LOGOUT: %s", user);
+    sprintf(buf, "LOGOUT: %s", (char*)user);
     
-    while(1){
-        // sending logout request.
-        if(Send(socket, buf) < 0){
-            break; // connection issues
-        }
-        // waiting for the server to respond
-        // OBS server sends request for closing the other process
-        if(readline(socket, buf) <0){
-            break; // connection issues
-        }
+    
+    Send(socket, buf);
+        
+    // waiting for the server to respond
+    // OBS server sends request for closing the other process
+    readline(socket, buf);    
 
-        if(strcmp(buf, "LOGGED OUT\n")){
-            break; // trying to log out until it successed
-        }
-    }
     
     Close(socket);
     
     kill(msg_handler, SIGKILL); // kill message handler process
     // waiting for child process to terminate.
-    
+    printf("%s\n",(char*)user);
     reap_messages(user); // delete messages
 
     while(waitpid(-1, &status, 0) > 0);
@@ -119,7 +111,7 @@ int logout(int socket, char *user, pid_t msg_handler){
 
 
 
-int look_up(int socket, char* args){
+int lookup(int socket, char* args){
 
     char buf[MAXLINE];
 
@@ -133,9 +125,7 @@ int look_up(int socket, char* args){
     }
 
     // print undtil end of file.
-    while(readline(socket, buf) > 0){
-        fprintf(stdin,"%s", buf);
-    }
+    readline(socket, buf);
 
 
     return 0;
@@ -322,18 +312,14 @@ int reap_messages(char* user){
     char path[MAXLINE];
     DIR *dir;
     struct dirent *messages;
-
+    
     // build directory path.
     sprintf(path, "%s/Messages", user);
-
     // fetch directory pointer.
+    
     dir = opendir(path);
-    if(dir == NULL){
-        // nothing to do.
-        Closedir(dir);
-        return 0;
-    }
-
+    
+    
     // read data struct into messages, and set pointer dir to next struct.
     while((messages = readdir(dir)) != NULL){
         
@@ -344,10 +330,12 @@ int reap_messages(char* user){
         sprintf(path, "%s/Messages/%s", user, messages -> d_name);
         remove(path);
 
-    }
+    } 
+    
     
     sprintf(path, "%s/Messages", user);
     // removing directory
     remove(path);
+    remove(user);
     return 0;
 }

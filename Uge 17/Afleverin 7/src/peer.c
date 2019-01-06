@@ -15,11 +15,11 @@ int main(int argc, char**argv) {
         return(0);
     }
 
-    int clientfd, listenfd, status, scan;
+    int clientfd, listenfd;
     char user[MAXLINE/2]; // this peers nickname
     char buf[MAXLINE];
     char command[MAXLINE], args[MAXLINE]; // placeholders for command and arguments from stdin
-    char nick[MAXLINE/4], pass[MAXLINE/4], host[MAXLINE/4], port[MAXLINE/4], path[MAXLINE];
+    char nick[MAXLINE/4], port[MAXLINE/4];
 
     // directories for Log and Messages
     pid_t msg_handler;
@@ -31,16 +31,23 @@ int main(int argc, char**argv) {
 
     // waiting for login
     while(1){
+        // reset buffers to prevent leaking of old data.
+        command[0] = '\0';
+        args[0] = '\0';
+        nick[MAXLINE/4] = '\0';
+        port[MAXLINE/4] = '\0';
+
         Fgets(buf, MAXLINE, stdin);
 
         // split command and arguments into two 
         // %[^\n] takes all char's after the first whitespace until but not including \n
-        scan = sscanf(buf, "%s %[^\n]", command, args);
+        sscanf(buf, "%s %[^\n]", command, args);
         if(strcmp(command, "/login") == 0){
             
-            if(login(connfd, args, &user) < 0){
+            if(login(clientfd, args, user) < 0){
                 continue; // login error try again.
             }
+            
             if((msg_handler = Fork()) == 0){
                 // closing server connection - no need for it -
                 Close(clientfd);
@@ -71,10 +78,21 @@ int main(int argc, char**argv) {
                     Close(connfd);
                 }                
 
-            }
+            }else{
 
-            while(1){
+                while(1){
                     // parent process
+                   
+                    
+                    // reset buffers to prevent leaking of old data.
+                    command[0] = '\0';
+                    args[0] = '\0';
+                    nick[MAXLINE/4] = '\0';
+
+                    
+                    Fgets(buf, MAXLINE, stdin);
+
+                    sscanf(buf, "%s %[^\n]", command, args);
                     
                     if(strcmp(command, "/login") == 0){
                         fprintf(stderr, "You are already logged in\n");
@@ -83,19 +101,21 @@ int main(int argc, char**argv) {
 
                     if(strcmp(command, "/logout") == 0){
                         
-                        logout(clientfd, user);
-                        break; // jump to login loop
+                        logout(clientfd, user, msg_handler);
+                        exit(0); // jump to login loop
                     }  
 
                     if(strcmp(command, "/lookup") == 0){
+                        if(strcmp(args, "") == 0 ){
+                            lookup(clientfd, NULL);
+                            continue;
+                        }
                         lookup(clientfd, args);
                         continue;
                     }
 
                     if(strcmp(command, "/msg") == 0){
-                        // send message case args hold nick if nick.
-
-                        // split '
+   
                     // split command and arguments into two nick' and 'msg' into nick an buf.
                         sscanf(args, "%s %[^\n]", nick, buf);
 
@@ -114,17 +134,20 @@ int main(int argc, char**argv) {
                     // exit part
                     if(strcmp(command, "/exit\n") == 0){
                         
-                        logout(connfd, user, msg_handler);                      
+                        logout(clientfd, user, msg_handler);                      
 
                         exit(0); // termination the program
                     }
+
                 }
+            }
         }
         // exit before login nothing to do but terminate process.
         if(strcmp(buf, "/exit\n") == 0){
             Close(clientfd);
             exit(0);
         }
+    
     }
 
 }

@@ -100,6 +100,10 @@ int main(int argc, char**argv) {
                     continue;
                 }
 
+                // make sure to not miss
+                command[0] = "\0";
+                args = "\0";
+
             }
 
             // terminate process.
