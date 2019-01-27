@@ -14,7 +14,7 @@ int Send(int socket, char *buf);
 // socket could be any file descriptor.
 int readline(int socket, char *buf);
 
-int login(int socket, char *args, void *user);
+int login(char *args, void *user);
 
 int logout(int socket, void *user, pid_t msg_handler);
 

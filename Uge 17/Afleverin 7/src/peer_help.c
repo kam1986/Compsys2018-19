@@ -72,6 +72,9 @@ int login(int socket, char *args, void *user){
         return -1; // reset to login
     }
     
+    sprintf(buf, "IP: %s Port: %s", ip, port);
+    Send(socket, buf);
+
     // login has happened finalize with sending ip and port.
     sprintf(path, "%s/Messages", nick);
     mkdir(nick, 0777);
