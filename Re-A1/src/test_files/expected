@@ -1,0 +1,76 @@
+test_files/ascii01.input:    ASCII text
+test_files/ascii02.input:    ASCII text
+test_files/ascii03.input:    ASCII text
+test_files/ascii04.input:    ASCII text
+test_files/ascii05.input:    ASCII text
+test_files/ascii06.input:    ASCII text
+test_files/ascii07.input:    ASCII text
+test_files/ascii08.input:    ASCII text
+test_files/ascii09.input:    ASCII text
+test_files/ascii10.input:    ASCII text
+test_files/ascii11.input:    ASCII text
+test_files/ascii12.input:    ASCII text
+test_files/ascii13.input:    ASCII text
+test_files/data01.input:     data
+test_files/data02.input:     data
+test_files/data03.input:     data
+test_files/data04.input:     data
+test_files/data05.input:     data
+test_files/data06.input:     data
+test_files/data07.input:     data
+test_files/data08.input:     data
+test_files/data09.input:     data
+test_files/data10.input:     data
+test_files/data11.input:     data
+test_files/data12.input:     data
+test_files/empty.input:      empty
+test_files/iso-8859a.input:  ISO-8859 text
+test_files/iso-8859b.input:  ISO-8859 text
+test_files/iso-8859c.input:  ISO-8859 text
+test_files/iso-8859d.input:  ISO-8859 text
+test_files/iso-8859e.input:  ISO-8859 text
+test_files/iso-8859f.input:  ISO-8859 text
+test_files/iso-8859g.input:  ISO-8859 text
+test_files/iso-8859h.input:  ISO-8859 text
+test_files/iso-8859i.input:  ISO-8859 text
+test_files/iso-8859j.input:  ISO-8859 text
+test_files/iso-8859k.input:  ISO-8859 text
+test_files/iso-8859l.input:  ISO-8859 text
+test_files/iso-8859m.input:  ISO-8859 text
+test_files/iso-8859n.input:  ISO-8859 text
+test_files/utf-16be-a.input: Big-endian UTF-16 Unicode text
+test_files/utf-16be-b.input: Big-endian UTF-16 Unicode text
+test_files/utf-16be-c.input: Big-endian UTF-16 Unicode text
+test_files/utf-16be-d.input: Big-endian UTF-16 Unicode text
+test_files/utf-16be-e.input: Big-endian UTF-16 Unicode text
+test_files/utf-16be-f.input: Big-endian UTF-16 Unicode text
+test_files/utf-16be-g.input: Big-endian UTF-16 Unicode text
+test_files/utf-16be-h.input: Big-endian UTF-16 Unicode text
+test_files/utf-16be-i.input: Big-endian UTF-16 Unicode text
+test_files/utf-16be-j.input: Big-endian UTF-16 Unicode text
+test_files/utf-16be-k.input: Big-endian UTF-16 Unicode text
+test_files/utf-16be-l.input: Big-endian UTF-16 Unicode text
+test_files/utf-16le-a.input: Little-endian UTF-16 Unicode text
+test_files/utf-16le-b.input: Little-endian UTF-16 Unicode text
+test_files/utf-16le-c.input: Little-endian UTF-16 Unicode text
+test_files/utf-16le-d.input: Little-endian UTF-16 Unicode text
+test_files/utf-16le-e.input: Little-endian UTF-16 Unicode text
+test_files/utf-16le-f.input: Little-endian UTF-16 Unicode text
+test_files/utf-16le-g.input: Little-endian UTF-16 Unicode text
+test_files/utf-16le-h.input: Little-endian UTF-16 Unicode text
+test_files/utf-16le-i.input: Little-endian UTF-16 Unicode text
+test_files/utf-16le-j.input: Little-endian UTF-16 Unicode text
+test_files/utf-16le-k.input: Little-endian UTF-16 Unicode text
+test_files/utf-16le-l.input: Little-endian UTF-16 Unicode text
+test_files/utf-8a.input:     UTF-8 Unicode text
+test_files/utf-8b.input:     UTF-8 Unicode text
+test_files/utf-8c.input:     UTF-8 Unicode text
+test_files/utf-8d.input:     UTF-8 Unicode text
+test_files/utf-8e.input:     UTF-8 Unicode text
+test_files/utf-8f.input:     UTF-8 Unicode text
+test_files/utf-8g.input:     UTF-8 Unicode text
+test_files/utf-8h.input:     UTF-8 Unicode text
+test_files/utf-8i.input:     UTF-8 Unicode text
+test_files/utf-8j.input:     UTF-8 Unicode text
+test_files/utf-8k.input:     UTF-8 Unicode text
+test_files/utf-8l.input:     UTF-8 Unicode text
