@@ -1,161 +1,91 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <string.h>
-
-
-#include "csapp.h"
 #include "peer.h"
+#include "help.h"
 
-#define ARGNUM 2 // the peer program takes a IP-adress 
-                 // and a port for which it shoud listingning to
+#define ARGNUM 2 // take a server ip and port as arguments
 
 
-
-int login(char* client, char* clientport, char* host, char* port, char* nick, char* password){
-    
-    // creating message to server, and responsebuffer
-    char msg[7+strlen(nick)+strlen(password)], buf[MAXLINE];
-
-    sprintf(msg, "/login %s %s %s %s\n", nick, password, client, clientport);
-    
-    // buffer
-    rio_t rio;
-    // init buffer
-    Rio_readinitb(&rio, clientfd);
-    
-    // open connection to server
-    // open_clientfd from csapp.h
-    int rsplen, clientfd = open_clientfd(host, port);
-
-    // check for connection error
-    if(clientfd == -1){
-        fprintf(stderr,"Could not find server. Try another host\n");
-        return clientfd;
-    }
-
-    // sending login request to server
-    Rio_writen(clientfd, msg, strlen(msg));
-
-    // keeps reading for response line undtil it comes
-    while((rsplen = Rio_readlineb(&rio, buf, MAXLINE)) <= 0){}
-    
-    switch(rsplen){
-        case 4: // should return 'true'
-            fprintf(stdout, "You are now logged in.\n");
-            // return socket (file descriptor)
-            return clientfd;
-
-        default:
-            fprintf(stderr, "Wrong user and/or password.\n");
-            return -1; // illegal fd (file descriptor) 
-    }
-}
-
-int logout(int clientfd){
-    if(clientfd != -1){
-        char* msg = "close\n";
-        // send closing message to server.
-        while(rio_writen(clientfd, msg, 6) < 0){}
-        
-        // close file descriptor
-        close(clientfd);
-        fprintf(stdout, "You are now logged out.\n");
+int main(int argc, char** argv) {
+    if (argc != ARGNUM + 1) {
+        printf("%s expects %d arguments.\n", (argv[0]+2), ARGNUM);
         return 0;
     }
 
-    fprintf(stderr, "You are not logged in\n");
-    return -1;
-}
+    int logged_in, clientfd;
 
-int lookup(int clientfd, char* input){
-    
-    char buf[MAXLINE];
-    int checker;
-    // init rio buffer reading
-    rio_t rio;
-    Rio_readinitb(&rio, clientfd);
+    // buffer, peername, command and arguments placeholder
+    char buf[MAXLINE], username[MAXLINE/2], cmd[8], args[MAXLINE/2];
 
-    // send request
-    while(rio_writen(clientfd, input, strlen(input)) < 0){}
-    
-    // read response OBS might need a redo
-    while((checker = Rio_readlineb(&rio, buf, MAXLINE)) >= 0){
-        fprintf(stdout, "%s\n", buf);
+    if((clientfd = Open_clientfd(argv[1], argv[2])) != 0){
+        fprintf(stderr, "No Server are found at (%s,%s)", argv[1],argv[2]);
+        return 0;
     }
 
-    return 0;
-}
-
-// with capital E to prevent naming conflict
-int Exit(int client){
-    logout(client);
-    exit(0);
-}
-
-
-
-
-// the program 
-int main(int argc, char**argv) {
-    if (argc != ARGNUM + 1) {
-        printf("%s expects %d arguments.\n", (argv[0]+2), ARGNUM);
-        return(0);
-    }
-
-    int clientfd;
-    
-    // main rutine 
     while(1){
-        // commandline command and arguments
-        char buf[1024], command[8], args[500];
-        // scanning input
-        fscanf(stdin, "%s", buf);
-        // filter input in command and arguments
-        sscanf(buf, "%s %s", command, args);
-
-        if(strcmp("/exit", command)){
-            // terminates the program.
-            Exit(clientfd);
+         
+        if(strcmp(buf, "/exit\n") == 0){
+            // Terminating the peer program
+            return 0;
         }
 
-        // send login request and set fd
-        if(strcmp("/login", command)){
-            char nick[100], password[1000], ip[15], port[5];
+        // read from stdin
+        Readline(0, buf);
+        sscanf(buf, "%s %[^\n]", cmd, args);
+
+        // command error
+        if(strcmp(cmd, "/login") != 0){
+            fprintf(stdout, "You need to login first..!\nUsage: /login <nick> <password> <host> <port>\n");
+            continue;
+        }
+        
+        // usage error
+        if(login(clientfd, args) != 0){
+            fprintf(stderr, "Usage: /login <nick> <password> <host> <port>\n");
+            continue;
+        }
+
+        // setting username
+        sscanf(buf, "/login %s %[^\n]", username, args);
+
+        while(logged_in){
+            Readline(0, buf);
+            sscanf(buf, "%s %[^\n]", cmd, args);
             
-            // filtering arguments from args 
-            sscanf(args,"%s %s %s %s", nick, password, ip, port);
-            
-            // try login to server (argv[1] = host-IP, argv[2] = host-port)
-            clientfd = login(ip, port, argv[1], argv[2], nick, password);
-        }
-
-        // logout
-        if(strcmp("/logout", command)){
-            logout(clientfd);
-        }
-
-        // lookup
-        if(strcmp("/lookup", command)){
-            // if logged in
-            if(clientfd != -1){
-                // if no arguments are given
-                if(strcmp("", args)){
-                    lookup(clientfd, "lookup\n");
-                
-                // if arguments are given
-                } else {
-                    char request[6+strlen(args)];
-                    
-                    // formating protocol
-                    sprintf(request, "lookup %s\n", args);
-                    lookup(clientfd, request); 
+            if(strcmp(cmd, "/logout") == 0){
+                // loggin out
+                if(logout(clientfd, username) != 0){
+                    continue;
                 }
+
+                Readline(clientfd, buf);
+                fprintf(stdout, "%s", buf);
+                logged_in--;
+                continue;
             }
+
+            if(strcmp(cmd, "/exit") == 0){
+                // exiting but the peer log out first
+                if(logout(clientfd, username) != 0){
+                    continue;
+                }
+
+                Readline(clientfd, buf);
+                fprintf(stdout, "%s", buf);
+                logged_in--;
+                continue;
+            }
+
+            if(strcmp(cmd, "/lookup") == 0){
+                // send lookup request to server and dump responce to stdout.
+                lookup(clientfd, 1, args);
+                continue;
+            }
+
         }
     }
 
 
     return 0;
-
 }
