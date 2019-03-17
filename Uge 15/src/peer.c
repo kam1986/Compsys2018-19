@@ -18,14 +18,14 @@ int main(int argc, char** argv) {
     // buffer, peername, command and arguments placeholder
     char buf[MAXLINE], username[MAXLINE/2], cmd[8], args[MAXLINE/2];
 
-    if((clientfd = Open_clientfd(argv[1], argv[2])) != 0){
-        fprintf(stderr, "No Server are found at (%s,%s)", argv[1],argv[2]);
+    if((clientfd = Open_clientfd(argv[1], argv[2])) < 0){
+        fprintf(stderr, "No Server are found at (%s,%s)", argv[1], argv[2]);
         return 0;
     }
 
     while(1){
          
-        if(strcmp(buf, "/exit\n") == 0){
+        if(strcmp(buf, "/exit") == 0){
             // Terminating the peer program
             return 0;
         }

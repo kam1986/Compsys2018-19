@@ -12,12 +12,12 @@
 
 // Server errors
 #define S_LOGIN_ERROR "Wrong nick or password.\n"
+#define S_LOGIN_ERROR_ON "A user is already logged on as %s\n"
 #define S_LOGOUT_ERROR "Logout error try again\n"
 #define S_LOOKUP_ERROR "%s is not a valid user.\n"
 
 // Peer requests
-#define P_LOGIN_REQUEST1 "LOGIN: NICK %s PASS: %s"
-#define P_LOGIN_REQUEST2 "IP: %s\nPort: %s"
+#define P_LOGIN_REQUEST1 "LOGIN: NICK: %s PASS: %s\nIP: %s\nPort: %s"
 #define P_LOGOUT_REQUEST "LOGOUT: %s"
 #define P_LOOKUP_REQUEST "LOOKUP: %s"
 

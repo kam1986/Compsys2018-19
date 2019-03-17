@@ -1,6 +1,8 @@
 CC = gcc
-CFLAGS =-Wall -Wextra -pedantic -std=gnu11
+CFLAGS = -Wall -Wextra -pedantic -std=gnu11
 LD_FLAGS = -lpthread
+TESTS = Tests/test_lookup 
+
 
 all : peer name_server
 
@@ -20,6 +22,7 @@ name_server : name_server.c name_server.h csapp.o help.o
 
 clean :
 	rm -rf *.o peer name_server
+
 
 ../src.zip :
 	make clean

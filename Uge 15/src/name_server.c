@@ -33,6 +33,8 @@ int main(int argc, char**argv) {
             Getnameinfo((SA *) &clientaddr, clientlen, 
                 client_hostname, MAXLINE, client_port, MAXLINE, 0);
             
+            fprintf(stdout, "Hello to %s", client_hostname);
+
             // peer procedure
             while(1){
 

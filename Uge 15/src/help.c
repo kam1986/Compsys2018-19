@@ -36,15 +36,22 @@ int Readline(int source, char* output){
         return -1;
     }
 
-    if(output == (char*) 0){
+    if(output == NULL){
         fprintf(stderr, "Uninitialized buffer.\n");
         return -2;
     }
 
     rio_t rio;
     Rio_readinitb(&rio, source);
+    int ret, cur;
     
-    return rio_readlineb(&rio, output, MAXLINE);
+    cur = lseek(source, 0, SEEK_CUR);
+    ret = rio_readlineb(&rio, output, MAXLINE);
+    
+    // error in pointer position in file descriptor when using MAXLINE
+    lseek(source, cur + ret, SEEK_SET);
+    
+    return ret;
 }
 
 
@@ -57,7 +64,7 @@ int Source_dump(int source, int sink){
     Rio_readinitb(&rio, source);
     int ret;
     while((ret = rio_readlineb(&rio, buf, MAXLINE)) > 0){
-        rio_writen(sink, buf, MAXLINE);
+        rio_writen(sink, buf, strlen(buf));
     }
 
     return ret;
@@ -69,32 +76,26 @@ int Source_dump(int source, int sink){
 // takes a file descriptor or socket and a list of argument
 int login(int serverfd, char* args){
 
-    char buf[MAXLINE], nick[MAXLINE/4], pass[MAXLINE/4], ip[MAXLINE/4], port[MAXLINE/4]; 
+    char buf[MAXLINE], nick[MAXLINE/8], pass[MAXLINE/8], ip[MAXLINE/8], port[MAXLINE/8]; 
     
     // wrong number of args and possibly empty args
-    if(scanf(args, "%s %s %s %s\n") != 4){
+    if(sscanf(args, "%s %s %s %s\n", nick, pass, ip, port) != 4){
         fprintf(stderr, P_LOGIN_ERROR);
         return -1;
     }
 
     // starting communication with server by sending the nick and pass
-    sprintf(buf, P_LOGIN_REQUEST1, nick, pass);
-    // send are define in ...
+    sprintf(buf, P_LOGIN_REQUEST1, nick, pass, ip, port);
+    
     Send(serverfd, buf);
     
-    // readline are defined in ... 
     Readline(serverfd, buf);
 
     if(strcmp(buf, S_LOGIN_REQUEST) != 0){
-        fprintf(stderr, S_LOGIN_ERROR);
+        fprintf(stderr, buf);
         return -2;
     }
-
-    // does not check against invalid ip and ports
-    sprintf(buf, P_LOGIN_REQUEST2, ip, port);
-    // send are define in ...
-    Send(serverfd, buf);
-
+    
     return 0;
 }
 
@@ -136,7 +137,7 @@ int lookup(int serverfd, int sink, char* args){
 
     // dump all from server to terminal
     // server formats the output
-    if(Source_dump(serverfd, sink) != 0){
+    if(Source_dump(serverfd, sink) > 0){
         fprintf(stderr, "Connection error\n");
         return -1;
     }
@@ -156,13 +157,15 @@ int Exit(int serverfd, char* args){
 int Login(int connfd, char* args){
     char buf[MAXLINE], path[MAXLINE], user[MAXLINE/2];
     int peer;
-    
+
+
     // find username
     sscanf(args, "NICK: %s ", user);
     sprintf(path, "./UserLog/%s.off", user);
     
     // peer do not exist error
-    if((peer = Open(path, O_RDWR, DEF_MODE)) < 0){
+    if((peer = Open(path, O_RDONLY, DEF_MODE)) < 0){
+        fprintf(stdout, "Can't find file\n");
         Send(connfd, S_LOGIN_ERROR);
         return -1;
     }
@@ -170,47 +173,72 @@ int Login(int connfd, char* args){
     Readline(peer, buf);
 
     // wrong nick or password
+    // buf hold the real nick and pass
+    // args are the once given by the peer
     if(strcmp(buf, args) != 0){
         Send(connfd, S_LOGIN_ERROR);
-        return -1;
+        return -2;
     }
     
-    // set position to start of the file
-    lseek(peer, 0,SEEK_SET);
-    // set mark to prevent multiple login
-    Send(peer, "LOGGED IN");
-    Send(peer, buf); // read nick and password back to the userfile.
-
     Close(peer);
     sprintf(path, "./UserLog/%s.on", user);
     
-    Send(connfd, "Send Host and ip");
-    /*
-        assumes that this will never return error
-        since the only error are memory shortage.
-    */
-    peer = Open(path, O_RDWR | O_CREAT, DEF_MODE);
+    peer = Open(path, O_CREAT | O_WRONLY, DEF_MODE);
     
     // writing first line of format to userfile
     sprintf(buf, "Nick: %s", user);
     Send(peer, buf);
     // getting host and ip
-    Readline(connfd, buf);
-    Send(peer, buf);
-    Close(peer);
+    while(Readline(connfd, buf) > 0){
+        Send(peer, buf);
+        lseek(peer, -1, SEEK_CUR);
+    }
 
+
+
+    Close(peer);
     // Send responce to peer 
     Send(connfd, S_LOGIN_RESPONCE);
     return 0;
 }
 
 int Logout(int connfd, char* args){
-    if(connfd || args){}
+    
+    char path[MAXLINE];
+    
+    //
+    if(connfd < 0){
+        fprintf(stderr,"connection error.\n");
+        return -1;
+    }
+
+    if(args == NULL){
+        Send(connfd, "Usage: /logout <nick>");
+        return -2;
+    }
+    sprintf(path,"./UserLog/%s.on", args);
+    
+    // remove nick.on e.i. login off.
+    remove(path);
+
     return 0;
 }
 
 int Lookup(int connfd, char* args){
-    if(connfd || args){}
+    
+    //
+    if(connfd < 0){
+        fprintf(stderr,"connection error.\n");
+        return -1;
+    }
+
+    if(args != NULL){
+        
+
+
+        return 0;
+    }
+
     return 0;
 }
 
