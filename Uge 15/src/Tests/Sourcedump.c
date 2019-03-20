@@ -10,13 +10,13 @@
 int main(){
 
     int s, d;
-    char source, destination, sbuf[MAXLINE], dbuf[MAXLINE];
+    char *source, *destination, sbuf[MAXLINE], dbuf[MAXLINE];
 
-    source      = "./TestFiles/source.test";
-    destination = "./TestFiles/destination.test"
+    source      = "./Tests/TestFiles/source.test";
+    destination = "./Tests/TestFiles/destination.test";
 
-    int s = Open(source, O_RDONLY, DEF_MODE);
-    int d = Open(destination, O_CREAT | O_RDWR, DEF_MODE);
+    s = Open(source, O_RDONLY, DEF_MODE);
+    d = Open(destination, O_CREAT | O_RDWR, DEF_MODE);
 
     // asserting for read/write.
     assert(Source_dump(s,d) == 0);
@@ -25,7 +25,7 @@ int main(){
     lseek(s, 0, SEEK_SET);
     lseek(d, 0, SEEK_SET);
 
-    while(Realine(s,sbuf) > 0 && Realine(d,dbuf) > 0){
+    while(Readline(s,sbuf) > 0 && Readline(d,dbuf) > 0){
         // asserting correctness
         assert(strcmp(sbuf,dbuf) == 0);
     } 

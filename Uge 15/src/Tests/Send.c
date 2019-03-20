@@ -9,9 +9,9 @@
 
 int main(void){
     int fd;
-    char *test, *expected = "Hello World\n", buf[15];
+    char *expected = "Hello World\n", buf[15];
 
-    assert((fd = Open("./TestFiles/Send.test", O_CREAT | O_RDWR, DEF_MODE)) > 0);
+    assert((fd = Open("./Tests/TestFiles/Send.test", O_CREAT | O_RDWR, DEF_MODE)) > 0);
 
     // asserting normal case
     assert(Send(fd, expected) > 0);

@@ -8,10 +8,10 @@
 
 int main(void){
 
-    char buf[15], *expected = "Hello world\n", *expected1 = "Hello World1\n", *error;
+    char buf[15], *expected = "Hello world\n", *expected1 = "Hello World1\n";
     int source;
     // assert file existens
-    assert((source = open("./TestFiles/Readline.test", O_RDONLY, DEF_MODE)) > 0);
+    assert((source = open("./Tests/TestFiles/Readline.test", O_RDONLY, DEF_MODE)) > 0);
 
     // assert reading file.
     assert(Readline(source, buf) > 0);
